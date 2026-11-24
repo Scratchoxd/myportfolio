@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>SCRATCHO. — Independent Video Editor</title>
+  <meta name="description" content="SCRATCHO. — Independent Video Editor. Turning raw footage into compelling visual experiences." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            viewportbg: '#141416',
+            stagebg: '#1B1C20',
+            panelbg: '#202227',
+            hairline: '#2D3038',
+            muted: '#A0A0A8',
+            crisp: '#FFFFFF',
+            cobalt: '#0066FF',
+            cyanpulse: '#00A3FF'
+          },
+          fontFamily: {
+            display: ['Montserrat', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg-outer: #141416;
+      --bg-stage: #1B1C20;
+      --text-main: #FFFFFF;
+      --text-secondary: #A0A0A8;
+      --border-subtle: #2D3038;
+      --accent-blue: #0066FF;
+      --accent-cyan: #00A3FF;
+      --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    ::selection {
+      background-color: #0066FF;
+      color: #FFFFFF;
+    }
+
+    /* Floating Hero Stage Card */
+    .hero-stage-card {
+      --spotlight-x: 76%;
+      --spotlight-y: 52%;
+      background:
+        radial-gradient(650px circle at var(--spotlight-x) var(--spotlight-y), rgba(0, 163, 255, 0.14), transparent 60%),
+        radial-gradient(circle at 76% 52%, rgba(0, 102, 255, 0.16) 0%, rgba(27, 28, 32, 0.96) 58%, #18191D 100%);
+      box-shadow:
+        0 35px 90px -15px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+      animation: heroCardEnter 0.85s var(--ease-cinematic) both;
+    }
+
+    @keyframes heroCardEnter {
+      from {
+        opacity: 0.01;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Subtle Editorial Film Grain */
+    .film-grain-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      pointer-events: none;
+      opacity: 0.024;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Electric Blue Orbs */
+    .hero-primary-orb {
+      background: radial-gradient(circle at 32% 30%, #00A3FF 0%, #0066FF 55%, #0039A6 100%);
+      box-shadow:
+        0 0 90px rgba(0, 102, 255, 0.35),
+        inset 0 0 40px rgba(255, 255, 255, 0.15);
+    }
+
+    .hero-bottom-orb {
+      background: linear-gradient(180deg, #0088FF 0%, #0047B3 100%);
+      box-shadow: 0 -10px 40px rgba(0, 102, 255, 0.25);
+      transform: translateY(48%);
+    }
+
+    @keyframes orbitSpinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-orbital-ring {
+      animation: orbitSpinSlow 46s linear infinite;
+    }
+
+    /* Logo Emblem Framing */
+    .logo-ring-glow {
+      box-shadow:
+        0 0 0 2px rgba(0, 163, 255, 0.78),
+        0 0 28px rgba(0, 102, 255, 0.55);
+      transition: box-shadow 0.4s var(--ease-cinematic);
+    }
+
+    /* Concentric Circular Arrow Button */
+    .concentric-cta-outer {
+      width: 58px;
+      height: 58px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.35s var(--ease-cinematic), transform 0.35s var(--ease-cinematic);
+    }
+
+    .concentric-cta-inner {
+      width: 40px;
+      height: 40px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.35s var(--ease-cinematic);
+    }
+
+    .cta-trigger:hover .concentric-cta-outer {
+      border-color: rgba(0, 163, 255, 0.55);
+      transform: scale(1.06);
+    }
+
+    .cta-trigger:hover .concentric-cta-inner {
+      background-color: #0066FF;
+      border-color: #00A3FF;
+      box-shadow: 0 0 20px rgba(0, 102, 255, 0.65);
+    }
+
+    /* Navigation Animated Underline */
+    .nav-item-link {
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .nav-item-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 1.5px;
+      background-color: #00A3FF;
+      transform: scaleX(0);
+      transform-origin: right center;
+      transition: transform 0.35s var(--ease-cinematic);
+    }
+
+    .nav-item-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
+
+    /* Equalizer Bars on Gallery Card Hover */
+    @keyframes eqBounce {
+      0%, 100% { transform: scaleY(0.35); }
+      50% { transform: scaleY(1); }
+    }
+
+    .eq-bar {
+      transform-origin: bottom;
+      transform: scaleY(0.35);
+    }
+
+    .group:hover .eq-bar-1 { animation: eqBounce 0.65s ease-in-out infinite; }
+    .group:hover .eq-bar-2 { animation: eqBounce 0.5s ease-in-out 0.15s infinite; }
+    .group:hover .eq-bar-3 { animation: eqBounce 0.7s ease-in-out 0.28s infinite; }
+    .group:hover .eq-bar-4 { animation: eqBounce 0.55s ease-in-out 0.1s infinite; }
+
+    /* Project Thumbnail Zoom */
+    .thumb-zoom {
+      transition: transform 0.75s var(--ease-cinematic);
+    }
+
+    .group:hover .thumb-zoom {
+      transform: scale(1.05);
+    }
+
+    /* ========================================================================
+       NLE TIMELINE SHOWCASE SECTION (SCROLL REVEAL + SINGLE SWIFT PLAYHEAD SWEEP)
+       ======================================================================== */
+    .timeline-reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s var(--ease-cinematic), transform 0.9s var(--ease-cinematic);
+    }
+
+    .timeline-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nle-frame-surface {
+      background:
+        radial-gradient(900px circle at 50% 0%, rgba(0, 102, 255, 0.08), transparent 65%),
+        linear-gradient(180deg, #101114 0%, #0C0D10 100%);
+      box-shadow:
+        0 30px 80px -20px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .nle-ruler-ticks {
+      background-image:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.16) 0px,
+          rgba(255, 255, 255, 0.16) 1px,
+          transparent 1px,
+          transparent 8.3333%
+        ),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.06) 0px,
+          rgba(255, 255, 255, 0.06) 1px,
+          transparent 1px,
+          transparent 2.0833%
+        );
+    }
+
+    .nle-grid-lines {
+      background-image: repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.035) 0px,
+        rgba(255, 255, 255, 0.035) 1px,
+        transparent 1px,
+        transparent 8.3333%
+      );
+    }
+
+    /* Multi-Track Clip Palette */
+    .nle-clip {
+      position: relative;
+      height: 100%;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 9px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .nle-clip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      pointer-events: none;
+    }
+
+    .clip-purple {
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.38) 0%, rgba(109, 40, 217, 0.28) 100%);
+      border: 1px solid rgba(167, 139, 250, 0.55);
+      color: #EDE9FE;
+    }
+
+    .clip-pink {
+      background: linear-gradient(90deg, rgba(236, 72, 153, 0.36) 0%, rgba(190, 24, 93, 0.26) 100%);
+      border: 1px solid rgba(244, 114, 182, 0.55);
+      color: #FCE7F3;
+    }
+
+    .clip-cyan {
+      background: linear-gradient(90deg, rgba(0, 163, 255, 0.36) 0%, rgba(6, 182, 212, 0.25) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.58);
+      color: #E0F2FE;
+    }
+
+    .clip-cobalt {
+      background: linear-gradient(90deg, rgba(0, 102, 255, 0.44) 0%, rgba(29, 78, 216, 0.3) 100%);
+      border: 1px solid rgba(96, 165, 250, 0.58);
+      color: #DBEAFE;
+    }
+
+    .clip-orange {
+      background: linear-gradient(90deg, rgba(249, 115, 22, 0.36) 0%, rgba(194, 65, 12, 0.26) 100%);
+      border: 1px solid rgba(251, 146, 60, 0.55);
+      color: #FFEDD5;
+    }
+
+    .clip-audio-cyan {
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.26) 0%, rgba(0, 102, 255, 0.22) 100%);
+      border: 1px solid rgba(34, 211, 238, 0.45);
+      color: #CFFAFE;
+    }
+
+    .clip-audio-purple {
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.26) 0%, rgba(126, 34, 206, 0.22) 100%);
+      border: 1px solid rgba(192, 132, 252, 0.45);
+      color: #F3E8FF;
+    }
+
+    /* Swift, Smooth Single-Pass Playhead Sweep (Left to Right Once on Reveal) */
+    @keyframes playheadSweepOnce {
+      0% {
+        left: 0%;
+        opacity: 1;
+      }
+      92% {
+        left: 100%;
+        opacity: 1;
+      }
+      100% {
+        left: 100%;
+        opacity: 0.92;
+      }
+    }
+
+    .nle-playhead {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0%;
+      width: 2px;
+      background-color: #FFFFFF;
+      box-shadow:
+        0 0 12px rgba(255, 255, 255, 0.98),
+        0 0 26px rgba(0, 163, 255, 0.75);
+      z-index: 30;
+      pointer-events: none;
+      will-change: left;
+    }
+
+    .nle-playhead::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 1px;
+      width: 44px;
+      background: linear-gradient(90deg, transparent 0%, rgba(0, 163, 255, 0.16) 75%, rgba(255, 255, 255, 0.22) 100%);
+      pointer-events: none;
+    }
+
+    .timeline-reveal.is-visible .nle-playhead {
+      animation: playheadSweepOnce 2.3s cubic-bezier(0.22, 1, 0.36, 1) 0.25s 1 forwards;
+    }
+
+    .nle-playhead-cap {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 11px;
+      height: 12px;
+      background-color: #FFFFFF;
+      clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.95);
+    }
+
+    /* Service Accordion */
+    .service-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.4s var(--ease-cinematic);
+    }
+
+    .service-item.is-open .service-body {
+      grid-template-rows: 1fr;
+    }
+
+    .service-body-inner {
+      overflow: hidden;
+    }
+
+    .service-plus {
+      transition: transform 0.35s var(--ease-cinematic), color 0.3s ease;
+    }
+
+    .service-item.is-open .service-plus {
+      transform: rotate(45deg);
+      color: #00A3FF;
+    }
+
+    /* Enquiry Drawer */
+    .enquiry-drawer {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.45s var(--ease-cinematic);
+    }
+
+    .enquiry-drawer.is-collapsed {
+      grid-template-rows: 0fr;
+    }
+
+    .enquiry-drawer-inner {
+      overflow: hidden;
+    }
+
+    /* Custom Desktop Cursor */
+    #custom-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background-color: #00A3FF;
+      box-shadow: 0 0 12px rgba(0, 163, 255, 0.75);
+      color: #FFFFFF;
+      pointer-events: none;
+      z-index: 95;
+      transform: translate3d(-50%, -50%, 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition:
+        width 0.3s var(--ease-cinematic),
+        height 0.3s var(--ease-cinematic),
+        background-color 0.25s ease,
+        border 0.25s ease,
+        opacity 0.25s ease;
+    }
+
+    #custom-cursor.is-active {
+      opacity: 1;
+    }
+
+    #custom-cursor.is-expanded {
+      width: 78px;
+      height: 78px;
+      background-color: rgba(0, 102, 255, 0.92);
+      border: 1px solid #00A3FF;
+      box-shadow: 0 0 25px rgba(0, 102, 255, 0.6);
+    }
+
+    #custom-cursor.is-subtle {
+      width: 32px;
+      height: 32px;
+      background-color: rgba(0, 163, 255, 0.1);
+      border: 1px solid #00A3FF;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      #custom-cursor {
+        display: none !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .timeline-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-viewportbg text-crisp">
+
+  <!-- Top Scroll Progress Bar -->
+  <div class="fixed top-0 left-0 right-0 h-[2px] z-[90] bg-white/5 pointer-events-none" aria-hidden="true">
+    <div id="scroll-progress-bar" class="h-full w-0 bg-gradient-to-r from-cobalt via-cyanpulse to-white"></div>
+  </div>
+
+  <!-- Subtle Film Grain -->
+  <div class="film-grain-overlay" aria-hidden="true"></div>
+
+  <!-- Hidden file input for manual logo upload fallback -->
+  <input id="logo-file-picker" type="file" accept="image/*" class="hidden" />
+
+  <!-- Custom Desktop Cursor -->
+  <div id="custom-cursor" aria-hidden="true">
+    <span id="cursor-label" class="opacity-0 transition-opacity duration-200"></span>
+  </div>
+
+  <!-- ========================================================================
+       MOBILE NAVIGATION DRAWER
+       ======================================================================== -->
+  <div id="mobile-menu" class="fixed inset-0 z-50 bg-viewportbg/98 backdrop-blur-md hidden flex-col justify-between p-6 sm:p-10">
+    <div class="flex items-center justify-between border-b border-hairline pb-5">
+      <a href="#top" class="inline-flex items-center gap-3 mobile-nav-close">
+        <span class="w-9 h-9 rounded-full overflow-hidden logo-ring-glow bg-stagebg inline-flex items-center justify-center">
+          <img
+            src="./Porfilelogo_2.png"
+            alt="SCRATCHO Logo"
+            class="scratcho-brand-logo w-full h-full object-cover"
+            onerror="handleLogoFallback(this)"
+          />
+        </span>
+        <span class="font-display text-lg font-extrabold tracking-wider uppercase">SCRATCHO<span class="text-cyanpulse">.</span></span>
+      </a>
+      <button id="close-menu-btn" type="button" class="font-mono text-xs uppercase tracking-[0.2em] text-crisp border border-hairline px-4 py-2 hover:border-cyanpulse transition-colors">
+        CLOSE
+      </button>
+    </div>
+
+    <nav class="flex flex-col gap-6 my-auto" aria-label="Mobile Navigation">
+      <a href="#gallery" class="mobile-nav-close font-display text-3xl sm:text-4xl font-bold uppercase tracking-wide hover:text-cyanpulse transition-colors">GALLERY</a>
+      <a href="#timeline-craft" class="mobile-nav-close font-display text-3xl sm:text-4xl font-bold uppercase tracking-wide hover:text-cyanpulse transition-colors">TIMELINE</a>
+      <a href="#about" class="mobile-nav-close font-display text-3xl sm:text-4xl font-bold uppercase tracking-wide hover:text-cyanpulse transition-colors">ABOUT</a>
+      <a href="#workflow" class="mobile-nav-close font-display text-3xl sm:text-4xl font-bold uppercase tracking-wide hover:text-cyanpulse transition-colors">WORKFLOW</a>
+      <a href="#contacts" class="mobile-nav-close font-display text-3xl sm:text-4xl font-bold uppercase tracking-wide hover:text-cyanpulse transition-colors">CONTACTS</a>
+    </nav>
+
+    <div class="border-t border-hairline pt-5 flex items-center justify-between font-mono text-xs text-muted">
+      <span>SCRATCHO // VIDEO EDITOR</span>
+      <span class="text-cyanpulse">scratcho.xb@gmail.com</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       SECTION 01 — FLOATING HERO STAGE
+       ======================================================================== -->
+  <section id="top" class="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 lg:p-12">
+    
+    <div id="hero-stage" class="hero-stage-card relative w-full max-w-[1260px] min-h-[620px] lg:h-[700px] rounded-[4px] overflow-hidden flex flex-col justify-between p-6 sm:p-10 lg:px-14 lg:py-11">
+      
+      <!-- Right-Side Large Electric Blue Orb -->
+      <div
+        id="hero-orb-parallax"
+        aria-hidden="true"
+        class="hero-primary-orb pointer-events-none absolute right-[-14%] sm:right-[2%] lg:right-[6%] top-1/2 -translate-y-1/2 w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] lg:w-[510px] lg:h-[510px] rounded-full z-0"
+      ></div>
+
+      <!-- Bottom-Center Accent Half-Circle -->
+      <div
+        aria-hidden="true"
+        class="hero-bottom-orb pointer-events-none absolute left-[34%] sm:left-[40%] bottom-0 w-[130px] h-[130px] sm:w-[165px] sm:h-[165px] rounded-full z-0"
+      ></div>
+
+      <!-- TOP BAR INSIDE HERO CARD -->
+      <header class="relative z-20 flex items-center justify-between">
+        <div class="flex items-center gap-8 sm:gap-12 lg:gap-14">
+          <!-- Brand Logo Top-Left -->
+          <a href="#top" data-cursor="subtle" class="group inline-flex items-center gap-3 focus:outline-none" title="SCRATCHO.">
+            <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden logo-ring-glow bg-viewportbg inline-flex items-center justify-center shrink-0">
+              <img
+                src="./Porfilelogo_2.png"
+                alt="SCRATCHO Logo"
+                class="scratcho-brand-logo w-full h-full object-cover"
+                onerror="handleLogoFallback(this)"
+              />
+            </span>
+            <span class="font-display text-sm sm:text-base font-extrabold tracking-[0.14em] uppercase text-crisp hidden sm:inline">
+              SCRATCHO<span class="text-cyanpulse">.</span>
+            </span>
+          </a>
+
+          <!-- Inline Minimal Navigation -->
+          <nav class="hidden md:flex items-center gap-7 lg:gap-9 font-display text-[11px] font-semibold tracking-[0.2em] uppercase text-crisp/90" aria-label="Primary Navigation">
+            <a href="#about" data-cursor="subtle" class="nav-item-link hover:text-cyanpulse transition-colors">ABOUT</a>
+            <a href="#gallery" data-cursor="subtle" class="nav-item-link hover:text-cyanpulse transition-colors">GALLERY</a>
+            <a href="#timeline-craft" data-cursor="subtle" class="nav-item-link hover:text-cyanpulse transition-colors">TIMELINE</a>
+            <a href="#workflow" data-cursor="subtle" class="nav-item-link hover:text-cyanpulse transition-colors">WORKFLOW</a>
+            <a href="#contacts" data-cursor="subtle" class="nav-item-link hover:text-cyanpulse transition-colors">CONTACTS</a>
+          </nav>
+        </div>
+
+        <!-- Top-Right Social Icons & Mobile Menu Button -->
+        <div class="flex items-center gap-4 sm:gap-5">
+          <div class="hidden sm:flex items-center gap-4 text-muted">
+            <a href="https://www.instagram.com/scratcho.xb/" target="_blank" rel="noopener noreferrer" data-cursor="subtle" aria-label="Instagram" class="hover:text-cyanpulse transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="4.5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a href="https://www.youtube.com/@Scratcho_xd" target="_blank" rel="noopener noreferrer" data-cursor="subtle" aria-label="YouTube" class="hover:text-cyanpulse transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <rect x="2.5" y="5.5" width="19" height="13" rx="3.5" />
+                <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a href="mailto:scratcho.xb@gmail.com" data-cursor="subtle" aria-label="Email" class="hover:text-cyanpulse transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="14" rx="1.5" />
+                <path d="M3 7l9 6 9-6" />
+              </svg>
+            </a>
+            <button type="button" data-copy="scratcho_xd" data-cursor="COPY" aria-label="Copy Discord Handle" class="discord-copy-btn hover:text-cyanpulse transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path d="M9 11.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="currentColor" stroke="none" />
+                <path d="M18.5 6.5A15.5 15.5 0 0 0 14.8 5.3l-.4.9a14 14 0 0 0-4.8 0l-.4-.9A15.5 15.5 0 0 0 5.5 6.5C3.4 9.7 2.8 12.8 3 15.9a15.8 15.8 0 0 0 4.7 2.4l.9-1.4a10 10 0 0 1-1.6-.8l.4-.3a11.2 11.2 0 0 0 9.2 0l.4.3a10 10 0 0 1-1.6.8l.9 1.4a15.8 15.8 0 0 0 4.7-2.4c.3-3.5-.5-6.6-2.5-9.4z" />
+              </svg>
+            </button>
+          </div>
+
+          <button id="open-menu-btn" type="button" class="md:hidden font-mono text-[11px] uppercase tracking-[0.2em] text-crisp border border-hairline px-3.5 py-2 hover:border-cyanpulse transition-colors">
+            MENU
+          </button>
+        </div>
+      </header>
+
+      <!-- CENTER SPLIT CONTENT INSIDE HERO CARD -->
+      <div class="relative z-20 grid grid-cols-1 lg:grid-cols-12 items-center gap-10 my-auto py-8 lg:py-0">
+        
+        <!-- Left Column: Availability + Eyebrow + Headline + Subcopy + CTAs -->
+        <div class="lg:col-span-6 flex flex-col items-start">
+          <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-hairline bg-viewportbg/85 mb-5">
+            <span class="w-2 h-2 rounded-full bg-cyanpulse shadow-[0_0_8px_#00A3FF]"></span>
+            <span class="font-mono text-[10px] tracking-[0.16em] uppercase text-crisp/90">
+              AVAILABLE FOR PROJECTS · SCRATCHO. / 2026
+            </span>
+          </div>
+
+          <span class="font-display text-[11px] sm:text-xs font-semibold tracking-[0.22em] uppercase text-crisp/80 mb-3">
+            INDEPENDENT VIDEO EDITOR
+          </span>
+
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-[0.04em] uppercase leading-[1.06] text-crisp mb-5">
+            VISUALS THAT SPEAK<span class="text-cyanpulse">.</span>
+          </h1>
+
+          <p class="max-w-[400px] text-sm sm:text-[15px] text-muted leading-relaxed mb-8 sm:mb-9">
+            I turn raw footage into compelling visual experiences through rhythmic pacing, clean transitions, and sound-driven storytelling.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-6">
+            <a href="#gallery" data-magnetic data-cursor="EXPLORE" class="cta-trigger inline-flex items-center gap-4 group focus:outline-none">
+              <span class="concentric-cta-outer">
+                <span class="concentric-cta-inner text-crisp">
+                  <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <path d="M3 8h10M9.5 4.5L13 8l-3.5 3.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+              </span>
+              <span class="font-display text-xs sm:text-[13px] font-semibold tracking-[0.12em] text-crisp group-hover:text-cyanpulse transition-colors">
+                Explore Work
+              </span>
+            </a>
+
+            <a href="#contacts" data-cursor="subtle" class="font-mono text-xs tracking-[0.16em] uppercase text-muted hover:text-cyanpulse border-b border-hairline hover:border-cyanpulse pb-1 transition-colors">
+              START A PROJECT →
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Column: Non-Interactive Decorative Logo Centerpiece -->
+        <div class="lg:col-span-6 flex flex-col items-center justify-center relative">
+          <div class="relative flex items-center justify-center" aria-label="SCRATCHO logo">
+            <span class="hero-orbital-ring absolute -inset-4 sm:-inset-6 rounded-full border border-dashed border-white/20 pointer-events-none"></span>
+            <span class="absolute -inset-2 rounded-full border border-white/10 pointer-events-none"></span>
+
+            <div class="w-56 h-56 sm:w-72 sm:h-72 lg:w-[340px] lg:h-[340px] rounded-full overflow-hidden logo-ring-glow bg-viewportbg relative shadow-2xl">
+              <img
+                src="./Porfilelogo_2.png"
+                alt="SCRATCHO Emblem"
+                class="scratcho-brand-logo w-full h-full object-cover"
+                onerror="handleLogoFallback(this)"
+              />
+            </div>
+          </div>
+
+          <button
+            id="missing-logo-helper"
+            type="button"
+            onclick="document.getElementById('logo-file-picker').click()"
+            class="hidden mt-4 font-mono text-[10px] tracking-[0.16em] uppercase text-cyanpulse bg-viewportbg/90 border border-cyanpulse/50 px-3.5 py-1.5 rounded-full hover:bg-cobalt hover:text-crisp transition-colors"
+          >
+            + LOAD LOCAL LOGO FILE
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Minimal Bottom Scroll Prompt -->
+      <div class="relative z-20 flex justify-end pt-2">
+        <a href="#gallery" data-cursor="subtle" class="font-mono text-[11px] tracking-[0.2em] uppercase text-muted hover:text-crisp transition-colors">
+          SCROLL ↓
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <main>
+    <!-- ======================================================================
+         SECTION 02 — CURATED STUDIO GALLERY (NO CATEGORY FILTER TABS)
+         ====================================================================== -->
+    <section id="gallery" class="w-full px-4 sm:px-8 lg:px-14 py-24 sm:py-32 border-t border-hairline">
+      <div class="max-w-[1260px] mx-auto">
+        
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-10 border-b border-hairline">
+          <div>
+            <span class="block font-mono text-xs tracking-[0.22em] text-cyanpulse uppercase mb-3">
+              02 // SELECTED EDITS
+            </span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold tracking-tight uppercase text-crisp">
+              CURATED WORK<span class="text-cyanpulse">.</span>
+            </h2>
+          </div>
+          <span class="font-mono text-xs text-muted uppercase tracking-[0.16em]">
+            CLICK ANY EDIT TO PLAY ON SITE
+          </span>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] tracking-[0.14em] text-muted uppercase">
+          <span>HOVER FOR MUTED PREVIEW // ON-SITE YOUTUBE STUDIO PLAYER</span>
+          <span class="text-cyanpulse">SHOWING 07 CURATED PROJECTS</span>
+        </div>
+
+        <!-- Asymmetric Studio Gallery Grid -->
+        <div id="projects-grid" class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-8">
+          <!-- Rendered dynamically by renderProjects() -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 03 — ANIMATED MULTI-TRACK NLE TIMELINE SHOWCASE
+         ====================================================================== -->
+    <section id="timeline-craft" class="w-full px-4 sm:px-8 lg:px-14 py-24 sm:py-32 border-t border-hairline bg-stagebg/40">
+      <div class="max-w-[1260px] mx-auto">
+        
+        <div class="timeline-reveal flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-10 border-b border-hairline">
+          <div>
+            <span class="block font-mono text-xs tracking-[0.22em] text-cyanpulse uppercase mb-3">
+              03 // TIMELINE ARCHITECTURE
+            </span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold tracking-tight uppercase text-crisp">
+              BEHIND THE TIMELINE<span class="text-cyanpulse">.</span>
+            </h2>
+          </div>
+          <p class="font-mono text-xs text-muted uppercase tracking-[0.14em] max-w-md">
+            MULTI-LAYER SEQUENCE COMPOSITION — COLOR GRADING, ADJUSTMENT FX, VELOCITY CUTS &amp; TRANSIENT AUDIO STEMS.
+          </p>
+        </div>
+
+        <!-- Non-Interactive NLE Timeline Showcase Frame -->
+        <div class="timeline-reveal mt-12 nle-frame-surface border border-hairline rounded-[4px] overflow-hidden">
+          
+          <!-- Subtle Sequence Metadata Strip -->
+          <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-hairline bg-[#0D0E11] font-mono text-[10px] sm:text-[11px] tracking-[0.16em] uppercase">
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full bg-cyanpulse shadow-[0_0_8px_#00A3FF]"></span>
+              <span class="text-crisp">SEQ_01 // SCRATCHO_MASTER_COMP.PRPROJ</span>
+            </div>
+            <div class="flex items-center gap-5 text-muted">
+              <span class="hidden sm:inline">1080×1920 · 60.00 FPS</span>
+              <span class="text-cyanpulse">6 ACTIVE LAYERS</span>
+            </div>
+          </div>
+
+          <!-- Horizontal Scroll Wrapper for Mobile / Full Fit on Desktop -->
+          <div class="overflow-x-auto">
+            <div class="min-w-[780px] w-full flex flex-col">
+              
+              <!-- Timecode Ruler Row -->
+              <div class="grid grid-cols-[92px_1fr] sm:grid-cols-[120px_1fr] border-b border-hairline bg-[#0E0F12]">
+                <div class="px-3 sm:px-4 py-2.5 border-r border-hairline font-mono text-[10px] tracking-[0.16em] text-muted uppercase flex items-center">
+                  TC // 60FPS
+                </div>
+                <div class="nle-ruler-ticks relative h-8 flex items-center justify-between px-3 font-mono text-[9.5px] tracking-[0.14em] text-muted/80 select-none">
+                  <span>00:00:00:00</span>
+                  <span>00:00:02:00</span>
+                  <span>00:00:04:00</span>
+                  <span>00:00:06:00</span>
+                  <span>00:00:08:00</span>
+                  <span>00:00:10:00</span>
+                  <span>00:00:12:00</span>
+                </div>
+              </div>
+
+              <!-- Stacked Tracks Container with Single-Pass Swift White Playhead -->
+              <div class="grid grid-cols-[92px_1fr] sm:grid-cols-[120px_1fr] relative">
+                
+                <!-- Left Track Headers Column -->
+                <div class="flex flex-col divide-y divide-hairline/80 border-r border-hairline bg-[#111216] font-mono text-[10px] tracking-[0.14em] select-none">
+                  <div class="h-11 px-3 sm:px-4 flex items-center justify-between">
+                    <span class="text-purple-400 font-medium">V4</span>
+                    <span class="text-[9px] text-muted hidden sm:inline">GRADE</span>
+                  </div>
+                  <div class="h-11 px-3 sm:px-4 flex items-center justify-between">
+                    <span class="text-pink-400 font-medium">V3</span>
+                    <span class="text-[9px] text-muted hidden sm:inline">GLOW/FX</span>
+                  </div>
+                  <div class="h-11 px-3 sm:px-4 flex items-center justify-between">
+                    <span class="text-cyanpulse font-medium">V2</span>
+                    <span class="text-[9px] text-muted hidden sm:inline">OVERLAY</span>
+                  </div>
+                  <div class="h-12 px-3 sm:px-4 flex items-center justify-between">
+                    <span class="text-blue-400 font-medium">V1</span>
+                    <span class="text-[9px] text-muted hidden sm:inline">PRIMARY</span>
+                  </div>
+                  <div class="h-12 px-3 sm:px-4 flex items-center justify-between bg-[#0E0F13]">
+                    <span class="text-cyan-300 font-medium">A1</span>
+                    <span class="text-[9px] text-muted hidden sm:inline">STEM</span>
+                  </div>
+                  <div class="h-11 px-3 sm:px-4 flex items-center justify-between bg-[#0E0F13]">
+                    <span class="text-purple-300 font-medium">A2</span>
+                    <span class="text-[9px] text-muted hidden sm:inline">SFX</span>
+                  </div>
+                </div>
+
+                <!-- Right Clips Canvas + Swift Single-Pass White Playhead -->
+                <div class="relative nle-grid-lines flex flex-col divide-y divide-hairline/70 overflow-hidden">
+                  
+                  <!-- THE BRIGHT WHITE PLAYHEAD (SWEEPS QUICKLY LEFT TO RIGHT ONCE) -->
+                  <div class="nle-playhead" aria-hidden="true">
+                    <div class="nle-playhead-cap"></div>
+                  </div>
+
+                  <!-- TRACK V4: COLOR GRADING & LUT ADJUSTMENT LAYERS -->
+                  <div class="relative h-11 px-1 py-1.5">
+                    <div class="nle-clip clip-purple" style="position:absolute; left:1%; width:47%; top:6px; bottom:6px;">
+                      <span>ADJ // COBALT_SHADOW_LUT.CUBE</span>
+                      <span class="opacity-65">FX</span>
+                    </div>
+                    <div class="nle-clip clip-purple" style="position:absolute; left:49.5%; width:49.5%; top:6px; bottom:6px;">
+                      <span>ADJ // HALATION + CONTRAST_CURVE</span>
+                      <span class="opacity-65">FX</span>
+                    </div>
+                  </div>
+
+                  <!-- TRACK V3: GLOW, SHAKE & IMPACT TRANSITIONS -->
+                  <div class="relative h-11 px-1 py-1.5">
+                    <div class="nle-clip clip-pink" style="position:absolute; left:6%; width:16%; top:6px; bottom:6px;">
+                      <span>DEEP_GLOW</span>
+                    </div>
+                    <div class="nle-clip clip-orange" style="position:absolute; left:23.5%; width:9%; top:6px; bottom:6px;">
+                      <span>IMPACT</span>
+                    </div>
+                    <div class="nle-clip clip-pink" style="position:absolute; left:36%; width:22%; top:6px; bottom:6px;">
+                      <span>OPTICAL_FLARE + SHAKE</span>
+                    </div>
+                    <div class="nle-clip clip-orange" style="position:absolute; left:60%; width:11%; top:6px; bottom:6px;">
+                      <span>WHIP_TR</span>
+                    </div>
+                    <div class="nle-clip clip-pink" style="position:absolute; left:74%; width:24%; top:6px; bottom:6px;">
+                      <span>CHROMATIC_ABERRATION</span>
+                    </div>
+                  </div>
+
+                  <!-- TRACK V2: ROTOSCOPE MASKS & KINETIC OVERLAYS -->
+                  <div class="relative h-11 px-1 py-1.5">
+                    <div class="nle-clip clip-cyan" style="position:absolute; left:2%; width:24%; top:6px; bottom:6px;">
+                      <span>MASK_SUBJECT_01</span>
+                    </div>
+                    <div class="nle-clip clip-cyan" style="position:absolute; left:30%; width:18%; top:6px; bottom:6px;">
+                      <span>DIR_BLUR_02</span>
+                    </div>
+                    <div class="nle-clip clip-orange" style="position:absolute; left:51%; width:19%; top:6px; bottom:6px;">
+                      <span>FLASH_FRAME_60P</span>
+                    </div>
+                    <div class="nle-clip clip-cyan" style="position:absolute; left:72.5%; width:26%; top:6px; bottom:6px;">
+                      <span>3D_CAMERA_NULL</span>
+                    </div>
+                  </div>
+
+                  <!-- TRACK V1: PRIMARY TIME-REMAPPED FOOTAGE CLIPS -->
+                  <div class="relative h-12 px-1 py-1.5">
+                    <div class="nle-clip clip-cobalt" style="position:absolute; left:0.5%; width:21%; top:6px; bottom:6px;">
+                      <span>CLIP_001.MP4</span>
+                      <span class="opacity-70">240%</span>
+                    </div>
+                    <div class="nle-clip clip-cobalt" style="position:absolute; left:22%; width:26%; top:6px; bottom:6px;">
+                      <span>CLIP_002_TWIXTOR.MP4</span>
+                      <span class="opacity-70">40%→180%</span>
+                    </div>
+                    <div class="nle-clip clip-cobalt" style="position:absolute; left:48.5%; width:23.5%; top:6px; bottom:6px;">
+                      <span>CLIP_003_SYNC.MP4</span>
+                      <span class="opacity-70">60FPS</span>
+                    </div>
+                    <div class="nle-clip clip-cobalt" style="position:absolute; left:72.5%; width:27%; top:6px; bottom:6px;">
+                      <span>CLIP_004_OUTRO.MP4</span>
+                      <span class="opacity-70">100%</span>
+                    </div>
+                  </div>
+
+                  <!-- TRACK A1: MAIN MUSIC STEM WITH SVG WAVEFORM -->
+                  <div class="relative h-12 px-1 py-1.5 bg-[#0C0D11]">
+                    <div class="nle-clip clip-audio-cyan" style="position:absolute; left:0.5%; width:99%; top:6px; bottom:6px;">
+                      <span class="relative z-10 bg-[#0B1926]/80 px-1.5 py-0.5 rounded-[2px]">MASTER_TRACK_STEM.WAV</span>
+                      <svg class="absolute inset-0 w-full h-full opacity-55" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true">
+                        <path
+                          d="M0,16 L8,11 L16,21 L24,7 L32,25 L40,13 L48,19 L56,5 L64,27 L72,10 L80,22 L88,14 L96,18 L104,4 L112,28 L120,12 L128,20 L136,8 L144,24 L152,14 L160,18 L168,3 L176,29 L184,9 L192,23 L200,11 L208,21 L216,6 L224,26 L232,13 L240,19 L248,5 L256,27 L264,10 L272,22 L280,14 L288,18 L296,2 L304,30 L312,8 L320,24 L328,11 L336,21 L344,6 L352,26 L360,12 L368,20 L376,4 L384,28 L392,9 L400,23 L408,13 L416,19 L424,5 L432,27 L440,10 L448,22 L456,7 L464,25 L472,12 L480,20 L488,3 L496,29 L504,11 L512,21 L520,8 L528,24 L536,13 L544,19 L552,6 L560,26 L568,12 L576,20 L584,14 L592,18 L600,16"
+                          fill="none"
+                          stroke="#22D3EE"
+                          stroke-width="1.35"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- TRACK A2: IMPACT SFX, RISERS & SUB DROPS -->
+                  <div class="relative h-11 px-1 py-1.5 bg-[#0C0D11]">
+                    <div class="nle-clip clip-audio-purple" style="position:absolute; left:4%; width:17%; top:6px; bottom:6px;">
+                      <span>RISER_TENSION.WAV</span>
+                    </div>
+                    <div class="nle-clip clip-audio-purple" style="position:absolute; left:22.5%; width:14%; top:6px; bottom:6px;">
+                      <span>SUB_BASS_HIT</span>
+                    </div>
+                    <div class="nle-clip clip-audio-purple" style="position:absolute; left:46%; width:16%; top:6px; bottom:6px;">
+                      <span>WHOOSH_SNAP</span>
+                    </div>
+                    <div class="nle-clip clip-audio-purple" style="position:absolute; left:71%; width:22%; top:6px; bottom:6px;">
+                      <span>REVERB_TAIL_OUT.WAV</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Subtle Layer Legend Footer -->
+          <div class="flex flex-wrap items-center justify-between gap-4 px-4 sm:px-6 py-3 border-t border-hairline bg-[#0D0E11] font-mono text-[10px] tracking-[0.15em] text-muted uppercase">
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-[1px] bg-purple-400"></span>COLOR &amp; LUT</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-[1px] bg-pink-400"></span>GLOW &amp; FX</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-[1px] bg-cyanpulse"></span>MASKS &amp; OVERLAYS</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-[1px] bg-orange-400"></span>TRANSITIONS</span>
+              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-[1px] bg-blue-500"></span>VELOCITY CUTS</span>
+            </div>
+            <span class="text-crisp/75">SEQUENCE SCAN COMPLETE</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 04 — ABOUT SCRATCHO & MANUAL AVAILABILITY
+         ====================================================================== -->
+    <section id="about" class="w-full px-4 sm:px-8 lg:px-14 py-24 sm:py-32 border-t border-hairline bg-stagebg/60">
+      <div class="max-w-[1260px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        <div class="lg:col-span-5 flex flex-col items-start">
+          <span class="block font-mono text-xs tracking-[0.22em] text-cyanpulse uppercase mb-4">
+            04 // ABOUT SCRATCHO
+          </span>
+          <h2 class="font-display text-3xl sm:text-5xl font-extrabold tracking-tight uppercase text-crisp leading-[1.06]">
+            CRAFTED ON THE TIMELINE<span class="text-cyanpulse">.</span>
+          </h2>
+          <div class="mt-8 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full overflow-hidden logo-ring-glow bg-viewportbg shrink-0">
+              <img
+                src="./Porfilelogo_2.png"
+                alt="SCRATCHO Emblem"
+                class="scratcho-brand-logo w-full h-full object-cover"
+                onerror="handleLogoFallback(this)"
+              />
+            </div>
+            <div class="font-mono text-xs">
+              <span class="block text-crisp font-medium">SCRATCHO.</span>
+              <span class="text-muted">INDEPENDENT VIDEO EDITOR</span>
+            </div>
+          </div>
+
+          <div class="mt-8 w-full max-w-sm border border-hairline bg-viewportbg p-4 rounded-[4px]">
+            <div class="flex items-center gap-2.5 mb-1.5">
+              <span class="w-2 h-2 rounded-full bg-cyanpulse shadow-[0_0_8px_#00A3FF]"></span>
+              <span class="font-mono text-[11px] font-medium tracking-[0.16em] text-crisp uppercase">
+                AVAILABLE FOR PROJECTS
+              </span>
+            </div>
+            <p class="font-mono text-[11px] text-cyanpulse tracking-[0.12em] uppercase mb-1">
+              SCRATCHO. / 2026
+            </p>
+            <p class="text-xs text-muted leading-relaxed">
+              Currently open to selected editing projects and collaborations.
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col gap-6 text-base sm:text-lg text-muted leading-relaxed">
+          <p class="text-crisp text-xl sm:text-2xl font-medium leading-snug">
+            SCRATCHO is an independent editing brand focused on transforming raw footage into sharp, memorable visual stories.
+          </p>
+          <p>
+            Using <strong>DaVinci Resolve</strong> and <strong>CapCut Pro</strong> for precision color grading, audio cleanup, velocity curves, and dynamic vertical formatting.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 05 — 4-STEP EDITING WORKFLOW
+         ====================================================================== -->
+    <section id="workflow" class="w-full px-4 sm:px-8 lg:px-14 py-24 sm:py-32 border-t border-hairline">
+      <div class="max-w-[1260px] mx-auto">
+        
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
+          <div>
+            <span class="block font-mono text-xs tracking-[0.22em] text-cyanpulse uppercase mb-3">
+              05 // EDITING WORKFLOW
+            </span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold tracking-tight uppercase text-crisp">
+              HOW WE WORK<span class="text-cyanpulse">.</span>
+            </h2>
+          </div>
+          <span class="font-mono text-xs text-muted uppercase tracking-[0.16em]">
+            DAVINCI RESOLVE // CAPCUT PRO
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="group border border-hairline bg-stagebg/50 p-7 rounded-[4px] flex flex-col justify-between min-h-[215px] hover:border-cyanpulse/70 transition-colors">
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-cyanpulse font-medium">STEP 01</span>
+              <span class="text-muted">BRIEF</span>
+            </div>
+            <div class="mt-8">
+              <h3 class="font-display text-xl font-bold uppercase text-crisp mb-2.5 group-hover:text-cyanpulse transition-colors">
+                BRIEF
+              </h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Understand the project goals, footage format, target platform, and desired runtime before touching the timeline.
+              </p>
+            </div>
+          </div>
+
+          <div class="group border border-hairline bg-stagebg/50 p-7 rounded-[4px] flex flex-col justify-between min-h-[215px] hover:border-cyanpulse/70 transition-colors">
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-cyanpulse font-medium">STEP 02</span>
+              <span class="text-muted">PLANNING</span>
+            </div>
+            <div class="mt-8">
+              <h3 class="font-display text-xl font-bold uppercase text-crisp mb-2.5 group-hover:text-cyanpulse transition-colors">
+                PLANNING
+              </h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Discuss references, audio track selection, pacing energy, and creative direction to lock in a clear visual plan.
+              </p>
+            </div>
+          </div>
+
+          <div class="group border border-hairline bg-stagebg/50 p-7 rounded-[4px] flex flex-col justify-between min-h-[215px] hover:border-cyanpulse/70 transition-colors">
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-cyanpulse font-medium">STEP 03</span>
+              <span class="text-muted">EDITING</span>
+            </div>
+            <div class="mt-8">
+              <h3 class="font-display text-xl font-bold uppercase text-crisp mb-2.5 group-hover:text-cyanpulse transition-colors">
+                EDITING
+              </h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Assemble cuts, velocity curves, transitions, sound design, and color grading in DaVinci Resolve or CapCut Pro.
+              </p>
+            </div>
+          </div>
+
+          <div class="group border border-hairline bg-stagebg/50 p-7 rounded-[4px] flex flex-col justify-between min-h-[215px] hover:border-cyanpulse/70 transition-colors">
+            <div class="flex items-center justify-between font-mono text-xs">
+              <span class="text-cyanpulse font-medium">STEP 04</span>
+              <span class="text-muted">DELIVERY</span>
+            </div>
+            <div class="mt-8">
+              <h3 class="font-display text-xl font-bold uppercase text-crisp mb-2.5 group-hover:text-cyanpulse transition-colors">
+                DELIVERY
+              </h3>
+              <p class="text-sm text-muted leading-relaxed">
+                Final high-bitrate master export and clean handover optimized for YouTube, Instagram, TikTok, or client distribution.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 06 — SERVICES
+         ====================================================================== -->
+    <section id="services" class="w-full px-4 sm:px-8 lg:px-14 py-24 sm:py-32 border-t border-hairline bg-stagebg/30">
+      <div class="max-w-[1260px] mx-auto">
+        
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div>
+            <span class="block font-mono text-xs tracking-[0.22em] text-cyanpulse uppercase mb-3">
+              06 // SERVICES
+            </span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold tracking-tight uppercase text-crisp">
+              WHAT I DO<span class="text-cyanpulse">.</span>
+            </h2>
+          </div>
+          <span class="font-mono text-xs text-muted uppercase tracking-[0.16em]">
+            [ CLICK TO EXPAND ]
+          </span>
+        </div>
+
+        <div class="border-t border-hairline">
+          <div class="service-item is-open border-b border-hairline transition-colors hover:bg-stagebg/50">
+            <button type="button" data-cursor="subtle" class="service-trigger w-full py-7 px-2 flex items-center justify-between gap-6 text-left focus:outline-none" aria-expanded="true">
+              <div class="flex items-baseline gap-6">
+                <span class="font-mono text-xs text-cyanpulse">01</span>
+                <h3 class="font-display text-xl sm:text-2xl font-bold uppercase text-crisp">SHORT-FORM &amp; VIRAL EDITS</h3>
+              </div>
+              <span class="service-plus font-mono text-2xl text-crisp select-none">+</span>
+            </button>
+            <div class="service-body">
+              <div class="service-body-inner">
+                <p class="px-2 pb-7 sm:pl-12 text-muted max-w-2xl leading-relaxed">
+                  High-retention YouTube Shorts, Instagram Reels, and TikTok edits engineered with strong visual hooks, crisp pacing, and clean kinetic typography.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-item border-b border-hairline transition-colors hover:bg-stagebg/50">
+            <button type="button" data-cursor="subtle" class="service-trigger w-full py-7 px-2 flex items-center justify-between gap-6 text-left focus:outline-none" aria-expanded="false">
+              <div class="flex items-baseline gap-6">
+                <span class="font-mono text-xs text-cyanpulse">02</span>
+                <h3 class="font-display text-xl sm:text-2xl font-bold uppercase text-crisp">HIGH-ENERGY VISUAL EDITS</h3>
+              </div>
+              <span class="service-plus font-mono text-2xl text-crisp select-none">+</span>
+            </button>
+            <div class="service-body">
+              <div class="service-body-inner">
+                <p class="px-2 pb-7 sm:pl-12 text-muted max-w-2xl leading-relaxed">
+                  Frame-accurate beat synchronization, custom time-remapping, impact frames, and atmospheric color grading tailored for high-energy stylistic cuts.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-item border-b border-hairline transition-colors hover:bg-stagebg/50">
+            <button type="button" data-cursor="subtle" class="service-trigger w-full py-7 px-2 flex items-center justify-between gap-6 text-left focus:outline-none" aria-expanded="false">
+              <div class="flex items-baseline gap-6">
+                <span class="font-mono text-xs text-cyanpulse">03</span>
+                <h3 class="font-display text-xl sm:text-2xl font-bold uppercase text-crisp">COMMERCIAL &amp; CREATOR LONG-FORM</h3>
+              </div>
+              <span class="service-plus font-mono text-2xl text-crisp select-none">+</span>
+            </button>
+            <div class="service-body">
+              <div class="service-body-inner">
+                <p class="px-2 pb-7 sm:pl-12 text-muted max-w-2xl leading-relaxed">
+                  Structured storytelling, dialogue cleanup, B-roll integration, and sound design for YouTube videos, promotional spots, and brand visuals.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 07 — CONTACTS & PROJECT ENQUIRY BRIEF BUILDER
+         ====================================================================== -->
+    <section id="contacts" class="w-full px-4 sm:px-8 lg:px-14 py-24 sm:py-32 border-t border-hairline bg-stagebg/50">
+      <div class="max-w-[1260px] mx-auto">
+        
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-14">
+          <div>
+            <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-hairline bg-viewportbg mb-5">
+              <span class="w-2 h-2 rounded-full bg-cyanpulse shadow-[0_0_8px_#00A3FF]"></span>
+              <span class="font-mono text-[10px] tracking-[0.16em] uppercase text-crisp">
+                AVAILABLE FOR PROJECTS — SCRATCHO. / 2026
+              </span>
+            </div>
+            <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.04] uppercase text-crisp max-w-4xl">
+              HAVE A PROJECT IN MIND?<br />
+              LET'S MAKE IT HAPPEN<span class="text-cyanpulse">.</span>
+            </h2>
+          </div>
+
+          <div class="flex flex-col items-start lg:items-end gap-3">
+            <button
+              id="toggle-enquiry-btn"
+              type="button"
+              data-magnetic
+              data-cursor="ENQUIRE"
+              aria-expanded="true"
+              class="inline-flex items-center gap-3.5 bg-cobalt hover:bg-cyanpulse text-crisp font-display text-xs sm:text-sm font-bold tracking-[0.16em] uppercase px-7 py-4 rounded-[4px] shadow-[0_0_30px_rgba(0,102,255,0.45)] transition-all"
+            >
+              <span>START A PROJECT</span>
+              <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M3 8h10M9.5 4.5L13 8l-3.5 3.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <span class="font-mono text-[11px] tracking-[0.14em] text-muted uppercase">
+              TYPICAL RESPONSE WITHIN 24 HOURS
+            </span>
+          </div>
+        </div>
+
+        <!-- Project Enquiry Form -->
+        <div id="enquiry-drawer" class="enquiry-drawer mb-12">
+          <div class="enquiry-drawer-inner">
+            <form id="project-enquiry-form" class="border border-hairline bg-viewportbg p-6 sm:p-8 lg:p-10 rounded-[4px]">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6 mb-6 border-b border-hairline">
+                <span class="font-mono text-xs tracking-[0.18em] text-cyanpulse uppercase">
+                  PROJECT BRIEF // DIRECT TO SCRATCHO.XB@GMAIL.COM
+                </span>
+                <span class="font-mono text-[11px] text-muted uppercase">
+                  SELECT YOUR SPECS BELOW
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+                <div>
+                  <label for="enquiry-type" class="block font-mono text-[11px] tracking-[0.16em] text-muted uppercase mb-2">
+                    PROJECT TYPE
+                  </label>
+                  <select id="enquiry-type" name="projectType" class="w-full bg-stagebg border border-hairline focus:border-cyanpulse rounded-[4px] px-4 py-3 text-sm text-crisp focus:outline-none">
+                    <option value="Short-Form / YouTube Shorts / Reels">Short-Form / YouTube Shorts / Reels</option>
+                    <option value="High-Energy / Stylistic Edit">High-Energy / Stylistic Edit</option>
+                    <option value="Music Video / Visualizer Edit">Music Video / Visualizer Edit</option>
+                    <option value="Commercial / Brand Promo">Commercial / Brand Promo</option>
+                    <option value="Creator Long-Form Video">Creator Long-Form Video</option>
+                    <option value="Other Custom Edit">Other Custom Edit</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="enquiry-budget" class="block font-mono text-[11px] tracking-[0.16em] text-muted uppercase mb-2">
+                    APPROXIMATE BUDGET
+                  </label>
+                  <select id="enquiry-budget" name="budget" class="w-full bg-stagebg border border-hairline focus:border-cyanpulse rounded-[4px] px-4 py-3 text-sm text-crisp focus:outline-none">
+                    <option value="Under $50">Under $50</option>
+                    <option value="$50 – $150" selected>$50 – $150</option>
+                    <option value="$150 – $350">$150 – $350</option>
+                    <option value="$350+">$350+</option>
+                    <option value="To Be Discussed">To Be Discussed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="enquiry-deadline" class="block font-mono text-[11px] tracking-[0.16em] text-muted uppercase mb-2">
+                    TARGET DEADLINE
+                  </label>
+                  <input id="enquiry-deadline" name="deadline" type="text" placeholder="e.g. Within 5 days / Next Friday" class="w-full bg-stagebg border border-hairline focus:border-cyanpulse rounded-[4px] px-4 py-3 text-sm text-crisp placeholder:text-muted/50 focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="mb-6">
+                <label for="enquiry-notes" class="block font-mono text-[11px] tracking-[0.16em] text-muted uppercase mb-2">
+                  PROJECT OVERVIEW &amp; REFERENCE LINKS
+                </label>
+                <textarea id="enquiry-notes" name="notes" rows="3" placeholder="Share your raw footage link, track/vibe references, or what you want the edit to feel like..." class="w-full bg-stagebg border border-hairline focus:border-cyanpulse rounded-[4px] px-4 py-3 text-sm text-crisp placeholder:text-muted/50 focus:outline-none"></textarea>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-3">
+                  <button type="submit" data-cursor="SEND" class="inline-flex items-center gap-2.5 bg-cobalt hover:bg-cyanpulse text-crisp font-mono text-xs tracking-[0.16em] uppercase px-6 py-3.5 rounded-[4px] transition-colors">
+                    <span>SEND VIA EMAIL APP</span>
+                    <span>↗</span>
+                  </button>
+                  <button id="copy-brief-btn" type="button" data-cursor="COPY" class="inline-flex items-center gap-2 border border-hairline hover:border-cyanpulse text-crisp font-mono text-xs tracking-[0.16em] uppercase px-5 py-3.5 rounded-[4px] transition-colors">
+                    <span>COPY BRIEF FOR DISCORD / IG</span>
+                  </button>
+                </div>
+                <span class="font-mono text-[11px] text-muted">
+                  Expected response: within 24 hours
+                </span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- 4 Contact Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <a href="mailto:scratcho.xb@gmail.com" data-cursor="EMAIL" class="group border border-hairline bg-viewportbg p-7 rounded-[4px] flex flex-col justify-between min-h-[195px] hover:border-cyanpulse transition-colors">
+            <div class="flex items-center justify-between text-muted group-hover:text-cyanpulse transition-colors">
+              <span class="font-mono text-xs tracking-[0.18em]">EMAIL</span>
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 7l9 6 9-6" />
+              </svg>
+            </div>
+            <div class="mt-8">
+              <span class="block font-sans text-sm sm:text-base font-medium text-crisp break-all">
+                scratcho.xb@gmail.com
+              </span>
+              <span class="mt-2 inline-block font-mono text-[11px] tracking-[0.14em] text-muted group-hover:text-cyanpulse uppercase transition-colors">
+                SEND EMAIL ↗
+              </span>
+            </div>
+          </a>
+
+          <a href="https://www.instagram.com/scratcho.xb/" target="_blank" rel="noopener noreferrer" data-cursor="OPEN" class="group border border-hairline bg-viewportbg p-7 rounded-[4px] flex flex-col justify-between min-h-[195px] hover:border-cyanpulse transition-colors">
+            <div class="flex items-center justify-between text-muted group-hover:text-cyanpulse transition-colors">
+              <span class="font-mono text-xs tracking-[0.18em]">INSTAGRAM</span>
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </div>
+            <div class="mt-8">
+              <span class="block font-sans text-base font-medium text-crisp">
+                @scratcho.xb
+              </span>
+              <span class="mt-2 inline-block font-mono text-[11px] tracking-[0.14em] text-muted group-hover:text-cyanpulse uppercase transition-colors">
+                OPEN PROFILE ↗
+              </span>
+            </div>
+          </a>
+
+          <a href="https://www.youtube.com/@Scratcho_xd" target="_blank" rel="noopener noreferrer" data-cursor="OPEN" class="group border border-hairline bg-viewportbg p-7 rounded-[4px] flex flex-col justify-between min-h-[195px] hover:border-cyanpulse transition-colors">
+            <div class="flex items-center justify-between text-muted group-hover:text-cyanpulse transition-colors">
+              <span class="font-mono text-xs tracking-[0.18em]">YOUTUBE</span>
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <rect x="2.5" y="5.5" width="19" height="13" rx="3.5" />
+                <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
+              </svg>
+            </div>
+            <div class="mt-8">
+              <span class="block font-sans text-base font-medium text-crisp">
+                @Scratcho_xd
+              </span>
+              <span class="mt-2 inline-block font-mono text-[11px] tracking-[0.14em] text-muted group-hover:text-cyanpulse uppercase transition-colors">
+                OPEN CHANNEL ↗
+              </span>
+            </div>
+          </a>
+
+          <button id="discord-copy-card" type="button" data-copy="scratcho_xd" data-cursor="COPY" class="group text-left border border-hairline bg-viewportbg p-7 rounded-[4px] flex flex-col justify-between min-h-[195px] hover:border-cyanpulse transition-colors focus:outline-none">
+            <div class="flex items-center justify-between w-full text-muted group-hover:text-cyanpulse transition-colors">
+              <span class="font-mono text-xs tracking-[0.18em]">DISCORD</span>
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path d="M9 11.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="currentColor" stroke="none" />
+                <path d="M18.5 6.5A15.5 15.5 0 0 0 14.8 5.3l-.4.9a14 14 0 0 0-4.8 0l-.4-.9A15.5 15.5 0 0 0 5.5 6.5C3.4 9.7 2.8 12.8 3 15.9a15.8 15.8 0 0 0 4.7 2.4l.9-1.4a10 10 0 0 1-1.6-.8l.4-.3a11.2 11.2 0 0 0 9.2 0l.4.3a10 10 0 0 1-1.6.8l.9 1.4a15.8 15.8 0 0 0 4.7-2.4c.3-3.5-.5-6.6-2.5-9.4z" />
+              </svg>
+            </div>
+            <div class="mt-8 w-full">
+              <span class="block font-sans text-base font-medium text-crisp">
+                scratcho_xd
+              </span>
+              <span id="discord-copy-status" class="mt-2 inline-block font-mono text-[11px] tracking-[0.14em] text-muted group-hover:text-cyanpulse uppercase transition-colors">
+                CLICK TO COPY HANDLE
+              </span>
+            </div>
+          </button>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       SECTION 08 — FOOTER
+       ======================================================================== -->
+  <footer class="w-full px-4 sm:px-8 lg:px-14 py-12 border-t border-hairline bg-viewportbg">
+    <div class="max-w-[1260px] mx-auto flex flex-col gap-8">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <a href="#top" data-cursor="subtle" class="group inline-flex items-center gap-3.5">
+          <span class="w-10 h-10 rounded-full overflow-hidden logo-ring-glow bg-stagebg inline-flex items-center justify-center shrink-0">
+            <img
+              src="./Porfilelogo_2.png"
+              alt="SCRATCHO Logo"
+              class="scratcho-brand-logo w-full h-full object-cover"
+              onerror="handleLogoFallback(this)"
+            />
+          </span>
+          <span class="font-display text-lg font-extrabold tracking-[0.14em] uppercase text-crisp">
+            SCRATCHO<span class="text-cyanpulse">.</span>
+          </span>
+        </a>
+
+        <nav class="flex flex-wrap items-center gap-7 font-display text-[11px] font-semibold tracking-[0.2em] text-muted uppercase" aria-label="Footer Navigation">
+          <a href="#about" data-cursor="subtle" class="hover:text-cyanpulse transition-colors">ABOUT</a>
+          <a href="#gallery" data-cursor="subtle" class="hover:text-cyanpulse transition-colors">GALLERY</a>
+          <a href="#timeline-craft" data-cursor="subtle" class="hover:text-cyanpulse transition-colors">TIMELINE</a>
+          <a href="#workflow" data-cursor="subtle" class="hover:text-cyanpulse transition-colors">WORKFLOW</a>
+          <a href="#contacts" data-cursor="subtle" class="hover:text-cyanpulse transition-colors">CONTACTS</a>
+        </nav>
+      </div>
+
+      <div class="pt-6 border-t border-hairline flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-xs text-muted">
+        <div class="flex flex-wrap items-center gap-6">
+          <a href="https://www.instagram.com/scratcho.xb/" target="_blank" rel="noopener noreferrer" data-cursor="subtle" class="inline-flex items-center gap-2 hover:text-cyanpulse transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+            </svg>
+            <span>@scratcho.xb</span>
+          </a>
+          <a href="https://www.youtube.com/@Scratcho_xd" target="_blank" rel="noopener noreferrer" data-cursor="subtle" class="inline-flex items-center gap-2 hover:text-cyanpulse transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <rect x="2.5" y="5.5" width="19" height="13" rx="3.5" />
+              <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
+            </svg>
+            <span>@Scratcho_xd</span>
+          </a>
+          <a href="mailto:scratcho.xb@gmail.com" data-cursor="subtle" class="inline-flex items-center gap-2 hover:text-cyanpulse transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="M3 7l9 6 9-6" />
+            </svg>
+            <span>scratcho.xb@gmail.com</span>
+          </a>
+          <button type="button" data-copy="scratcho_xd" data-cursor="COPY" class="discord-copy-btn inline-flex items-center gap-2 hover:text-cyanpulse transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path d="M9 11.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="currentColor" stroke="none" />
+              <path d="M18.5 6.5A15.5 15.5 0 0 0 14.8 5.3l-.4.9a14 14 0 0 0-4.8 0l-.4-.9A15.5 15.5 0 0 0 5.5 6.5C3.4 9.7 2.8 12.8 3 15.9a15.8 15.8 0 0 0 4.7 2.4l.9-1.4a10 10 0 0 1-1.6-.8l.4-.3a11.2 11.2 0 0 0 9.2 0l.4.3a10 10 0 0 1-1.6.8l.9 1.4a15.8 15.8 0 0 0 4.7-2.4c.3-3.5-.5-6.6-2.5-9.4z" />
+            </svg>
+            <span>scratcho_xd</span>
+          </button>
+        </div>
+
+        <span>© 2026 SCRATCHO. ALL RIGHTS RESERVED.</span>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       SPLIT-SCREEN STUDIO CASE STUDY LIGHTBOX MODAL (DIRECT HTML5 VIDEO PLAYER)
+       ======================================================================== -->
+  <div id="video-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 bg-viewportbg/95 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="modal-project-title">
+    <div id="modal-backdrop" class="absolute inset-0"></div>
+
+    <div class="relative z-10 w-full max-w-[960px] max-h-[92vh] border border-hairline bg-stagebg rounded-[4px] shadow-[0_25px_90px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-hairline shrink-0">
+        <div class="flex items-center gap-3">
+          <span id="modal-project-category" class="font-mono text-[11px] tracking-[0.16em] text-cyanpulse uppercase">
+            01 // STUDIO PLAYER
+          </span>
+          <span class="hidden sm:inline font-mono text-[11px] text-muted">
+            // DAVINCI RESOLVE &amp; CAPCUT PRO
+          </span>
+        </div>
+        <button id="modal-close-btn" type="button" data-cursor="CLOSE" class="font-mono text-[11px] tracking-[0.16em] uppercase text-crisp border border-hairline px-3.5 py-1.5 hover:border-cyanpulse transition-colors">
+          CLOSE [ESC]
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 overflow-y-auto">
+        <div class="lg:col-span-5 bg-viewportbg flex flex-col items-center justify-center p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-hairline gap-3">
+          <div id="modal-media-stage" class="relative w-full max-w-[300px] aspect-[9/16] rounded-[4px] border border-hairline bg-black overflow-hidden shadow-2xl flex items-center justify-center">
+            <!-- Native HTML5 Video Element with Direct Source Links -->
+          </div>
+          <div class="w-full max-w-[300px] flex flex-col items-center gap-2">
+            <span class="font-mono text-[10px] tracking-[0.16em] uppercase text-cyanpulse/90">
+              ● ON-SITE YOUTUBE PLAYER ACTIVE
+            </span>
+            <div class="flex items-center justify-center gap-1.5 w-full">
+              <button type="button" onclick="activeModalProject && mountModalPlayer(activeModalProject, 'standard')" class="font-mono text-[9px] tracking-[0.12em] uppercase px-2 py-1 rounded-[2px] border border-hairline bg-stagebg hover:border-cyanpulse text-crisp/80 hover:text-cyanpulse transition-colors">
+                EMBED 1
+              </button>
+              <button type="button" onclick="activeModalProject && mountModalPlayer(activeModalProject, 'nocookie')" class="font-mono text-[9px] tracking-[0.12em] uppercase px-2 py-1 rounded-[2px] border border-hairline bg-stagebg hover:border-cyanpulse text-crisp/80 hover:text-cyanpulse transition-colors">
+                EMBED 2
+              </button>
+              <button type="button" onclick="activeModalProject && mountModalPlayer(activeModalProject, 'stream')" class="font-mono text-[9px] tracking-[0.12em] uppercase px-2 py-1 rounded-[2px] border border-cyanpulse/50 bg-cobalt/20 hover:bg-cobalt text-cyanpulse hover:text-crisp transition-colors">
+                DIRECT STREAM
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between gap-6">
+          <div>
+            <span class="block font-mono text-[11px] tracking-[0.18em] text-muted uppercase mb-2">
+              PROJECT CASE STUDY
+            </span>
+            <h3 id="modal-project-title" class="font-display text-2xl sm:text-3xl font-extrabold uppercase text-crisp leading-tight">
+              PROJECT TITLE
+            </h3>
+            <p id="modal-project-desc" class="mt-2.5 text-sm text-muted leading-relaxed">
+              Project overview.
+            </p>
+
+            <div class="mt-6 space-y-5 border-t border-hairline pt-6">
+              <div>
+                <span class="block font-mono text-[10px] tracking-[0.2em] text-cyanpulse uppercase mb-1.5">
+                  01 // CREATIVE DIRECTION
+                </span>
+                <p id="modal-creative-direction" class="text-sm text-crisp/90 leading-relaxed"></p>
+              </div>
+
+              <div>
+                <span class="block font-mono text-[10px] tracking-[0.2em] text-cyanpulse uppercase mb-1.5">
+                  02 // EDITING TECHNIQUES USED
+                </span>
+                <div id="modal-techniques" class="flex flex-wrap gap-2 mt-1"></div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1">
+                <div>
+                  <span class="block font-mono text-[10px] tracking-[0.2em] text-cyanpulse uppercase mb-1.5">
+                    03 // SOFTWARE USED (DAVINCI RESOLVE &amp; CAPCUT PRO)
+                  </span>
+                  <div id="modal-software" class="flex flex-wrap gap-2 mt-1"></div>
+                </div>
+
+                <div>
+                  <span class="block font-mono text-[10px] tracking-[0.2em] text-cyanpulse uppercase mb-1.5">
+                    04 // WHAT SCRATCHO HANDLED
+                  </span>
+                  <ul id="modal-handled" class="text-xs text-crisp/90 space-y-1 font-mono"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-5 border-t border-hairline flex flex-wrap items-center justify-between gap-4">
+            <span class="font-mono text-[11px] text-muted uppercase">
+              WANT AN EDIT WITH THIS ENERGY?
+            </span>
+            <a href="#contacts" id="modal-book-cta" class="inline-flex items-center gap-2 bg-cobalt hover:bg-cyanpulse text-crisp font-mono text-[11px] tracking-[0.16em] uppercase px-4 py-2.5 rounded-[3px] transition-colors">
+              <span>START SIMILAR PROJECT</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toast-banner" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 translate-y-4 opacity-0 pointer-events-none transition-all duration-300 border border-cyanpulse bg-stagebg px-5 py-3 rounded-[4px] font-mono text-xs tracking-[0.16em] text-crisp uppercase shadow-2xl">
+    COPIED TO CLIPBOARD
+  </div>
+
+  <!-- ========================================================================
+       JAVASCRIPT: COMPLETE & SELF-CONTAINED
+       ======================================================================== -->
+  <script>
+    /**
+     * 1. LOGO FALLBACK CHAIN: Porfilelogo_2.png -> Porfilelogo.png -> SVG Emblem
+     */
+    function handleLogoFallback(imgEl) {
+      const stage = Number(imgEl.dataset.fallbackStage || '0');
+      if (stage === 0) {
+        imgEl.dataset.fallbackStage = '1';
+        imgEl.src = './Porfilelogo.png';
+        return;
+      }
+      if (stage >= 2) return;
+      imgEl.dataset.fallbackStage = '2';
+
+      const svgFallback =
+        'data:image/svg+xml;utf8,' +
+        encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+            <defs>
+              <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#0A192F"/>
+                <stop offset="100%" stop-color="#05070B"/>
+              </radialGradient>
+              <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00B4FF"/>
+                <stop offset="100%" stop-color="#0055FF"/>
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="98" fill="url(#bg)"/>
+            <circle cx="100" cy="100" r="92" fill="none" stroke="url(#ring)" stroke-width="5"/>
+            <polygon points="100,12 108,24 92,24" fill="#00B4FF"/>
+            <circle cx="145" cy="68" r="22" fill="none" stroke="#00B4FF" stroke-width="3"/>
+            <circle cx="145" cy="59" r="6" fill="#00A3FF"/>
+            <circle cx="137" cy="73" r="6" fill="#007BFF"/>
+            <circle cx="153" cy="73" r="6" fill="#007BFF"/>
+            <text x="100" y="114" text-anchor="middle" fill="#FFFFFF" font-family="Montserrat, sans-serif" font-weight="800" font-size="30" letter-spacing="2">SCRATCHO</text>
+            <text x="100" y="138" text-anchor="middle" fill="#00B4FF" font-family="monospace" font-size="11" letter-spacing="4">VIDEO EDITOR</text>
+          </svg>`
+        );
+
+      imgEl.src = svgFallback;
+      const helperBtn = document.getElementById('missing-logo-helper');
+      if (helperBtn) helperBtn.classList.remove('hidden');
+    }
+
+    const logoFilePicker = document.getElementById('logo-file-picker');
+    if (logoFilePicker) {
+      logoFilePicker.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const objectUrl = URL.createObjectURL(file);
+        document.querySelectorAll('.scratcho-brand-logo').forEach((img) => {
+          img.src = objectUrl;
+        });
+        document.getElementById('missing-logo-helper')?.classList.add('hidden');
+      });
+    }
+
+    /**
+     * 2. CURATED PROJECTS & CASE STUDIES (REAL YOUTUBE VIDEOS WITH MULTI-LAYER ERROR 153 BYPASS ENGINE)
+     */
+    const PROJECTS = [
+      {
+        id: 'short-01',
+        youtubeId: 'GZYl0cCAXu8',
+        index: '01',
+        title: 'MEANT TO BE — STYLISTIC EDIT',
+        category: 'FEATURED EDIT',
+        specs: ['FEATURED', '60 FPS', 'BEAT SYNC'],
+        description: 'High-impact vertical edit synced to heavy beat drops, velocity curves, and atmospheric contrast.',
+        creativeDirection: 'Built around escalating tension and clean silhouette contrast—holding stillness right before the drop so every kinetic cut and impact frame hits with maximum weight.',
+        techniques: ['Velocity Time-Remapping', 'Impact Frame Flashes', 'Directional Blur Transitions', 'Beat-Locked Camera Shakes', 'Cobalt Shadow Grade'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Pacing & Structure', 'Velocity & Transitions', 'Sound Design & Bass Sync', 'Color Grading'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/GZYl0cCAXu8/hqdefault.jpg'
+      },
+      {
+        id: 'short-02',
+        youtubeId: 'WMQuSymD9NQ',
+        index: '02',
+        title: 'SCRATCHO CUT II — KINETIC FLOW',
+        category: 'SHORTS',
+        specs: ['9:16', 'RETENTION'],
+        description: 'Fast-paced vertical sequence engineered for immediate hook retention, rhythmic cuts, and seamless visual momentum.',
+        creativeDirection: 'Designed to eliminate dead air in the first 1.5 seconds using motion-matched cuts and tight rhythmic phrasing that keeps viewers locked through the loop.',
+        techniques: ['J-Cut Audio Lead-Ins', 'Match-Action Cuts', 'Optical Flow Speed Ramps', 'Dynamic Framing'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Hook Pacing', 'Rhythmic Cutting', 'SFX Layering', 'Final 9:16 Master'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/WMQuSymD9NQ/hqdefault.jpg'
+      },
+      {
+        id: 'short-03',
+        youtubeId: 'iRp0DucLioM',
+        index: '03',
+        title: 'SCRATCHO CUT III — VELOCITY & FX',
+        category: 'MUSIC & VIBE',
+        specs: ['SFX', 'TIME-REMAP'],
+        description: 'Precision time-remapping, layered transient SFX, and clean visual transitions driven by percussive audio cues.',
+        creativeDirection: 'Treated the soundtrack as the primary storyboard—sculpting slow-motion anticipation frames into sharp, percussive snap cuts.',
+        techniques: ['Graph-Editor Speed Curves', 'Layered Sub-Drop SFX', 'Masking & Whip Transitions', 'Contrast Grading'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Visual Storytelling', 'Time-Remapping', 'Audio Stem Mixing', 'Color Finishing'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/iRp0DucLioM/hqdefault.jpg'
+      },
+      {
+        id: 'short-04',
+        youtubeId: 'UWgq46w1Abo',
+        index: '04',
+        title: 'SCRATCHO CUT IV — PULSE & RHYTHM',
+        category: 'SHORTS',
+        specs: ['9:16', 'BEAT SYNC'],
+        description: 'Tight percussive cutting paired with smooth optical speed ramps and clean atmospheric glow.',
+        creativeDirection: 'Focused on micro-timing every transition to snare hits and bass swells for an uninterrupted visual flow.',
+        techniques: ['Beat-Locked Speed Ramps', 'Halation Glow Pass', 'Whip Pan Transitions', 'Sub-Bass SFX Layering'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Rhythmic Cutting', 'Velocity Curves', 'Audio Design', 'Color Grade'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/UWgq46w1Abo/hqdefault.jpg'
+      },
+      {
+        id: 'short-05',
+        youtubeId: '4EPiY67hdG0',
+        index: '05',
+        title: 'SCRATCHO CUT V — SHADOW & MOTION',
+        category: 'STYLISTIC EDIT',
+        specs: ['60 FPS', 'GRADE'],
+        description: 'Mood-driven visual sequence balancing deep contrast grading with sharp kinetic camera movement.',
+        creativeDirection: 'Used negative space and controlled camera shakes to amplify key focal moments without visual clutter.',
+        techniques: ['Custom Contrast LUT', 'Directional Motion Blur', 'Keyframed Zoom Curves', 'Transient SFX Sync'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Pacing & Flow', 'Color Grading', 'Motion Framing', 'Final Master'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/4EPiY67hdG0/hqdefault.jpg'
+      },
+      {
+        id: 'short-06',
+        youtubeId: 'pYzf1_GQr5M',
+        index: '06',
+        title: 'SCRATCHO CUT VI — KINETIC SURGE',
+        category: 'MUSIC & VIBE',
+        specs: ['VELOCITY', 'FX'],
+        description: 'High-energy visual edit driven by aggressive time-remapping, flash frames, and layered sound textures.',
+        creativeDirection: 'Built rapid momentum from frame one using seamless match-cuts and crisp high-frequency audio risers.',
+        techniques: ['Twixtor-Style Flow', 'Impact Flash Frames', 'Chromatic Edge Accent', 'Audio Riser Builds'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Time-Remapping', 'Visual FX', 'Sound Mixing', '9:16 Delivery'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/pYzf1_GQr5M/hqdefault.jpg'
+      },
+      {
+        id: 'short-07',
+        youtubeId: 'Rt1NsYkTbac',
+        index: '07',
+        title: 'SCRATCHO CUT VII — CLEAN FINALE',
+        category: 'SHORTS',
+        specs: ['9:16', 'LOOP'],
+        description: 'Seamless loop-engineered vertical edit crafted for high replay value and crisp visual polish.',
+        creativeDirection: 'Structured the outro frame and audio tail to bridge cleanly back into the opening hook.',
+        techniques: ['Seamless Loop Cut', 'Optical Flow Remap', 'Clean Vignette & Grade', 'Stereo SFX Placement'],
+        software: ['DaVinci Resolve', 'CapCut Pro'],
+        handled: ['Loop Architecture', 'Pacing & Cuts', 'Sound Polish', 'Color Finishing'],
+        thumbnailUrl: 'https://i.ytimg.com/vi/Rt1NsYkTbac/hqdefault.jpg'
+      }
+    ];
+
+    /**
+     * 3. RENDER GALLERY (NO CATEGORY FILTER TABS)
+     */
+    const projectsGrid = document.getElementById('projects-grid');
+
+    function renderProjects() {
+      if (!projectsGrid) return;
+      projectsGrid.innerHTML = PROJECTS.map((project, idx) => {
+        const isLeadFeatured = idx === 0;
+        const colSpanClass = isLeadFeatured ? 'lg:col-span-6' : 'lg:col-span-3';
+        const aspectClass = isLeadFeatured ? 'aspect-[9/12] sm:aspect-[16/15] lg:aspect-[10/13]' : 'aspect-[9/14]';
+
+        return `
+          <article class="group ${colSpanClass}">
+            <button
+              type="button"
+              data-project-id="${project.id}"
+              data-cursor="PLAY EDIT"
+              aria-label="Play ${project.title}"
+              class="project-card-btn block w-full h-full text-left focus:outline-none"
+            >
+              <div class="relative w-full h-full ${aspectClass} rounded-[4px] border border-hairline group-hover:border-cyanpulse/80 bg-stagebg overflow-hidden transition-colors">
+                <img
+                  src="${project.thumbnailUrl}"
+                  alt="${project.title}"
+                  loading="lazy"
+                  class="thumb-zoom absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-500"
+                />
+
+                <div class="hover-preview-slot pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 bg-black overflow-hidden flex items-center justify-center"></div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-viewportbg via-viewportbg/30 to-transparent pointer-events-none"></div>
+
+                <div class="relative z-10 h-full flex flex-col justify-between p-5 sm:p-6">
+                  <div class="flex items-center justify-between gap-2 font-mono text-[11px] tracking-[0.16em]">
+                    <span class="bg-viewportbg/90 border border-hairline px-2.5 py-1 rounded-[3px] text-crisp">
+                      ${project.index}${isLeadFeatured ? ' // FEATURED' : ''}
+                    </span>
+                    <span class="inline-flex items-center gap-2 bg-viewportbg/90 border border-cyanpulse/40 px-2.5 py-1 rounded-[3px] text-cyanpulse">
+                      <span class="inline-flex items-end gap-[2px] h-2.5" aria-hidden="true">
+                        <span class="eq-bar eq-bar-1 w-[2px] h-full bg-cyanpulse"></span>
+                        <span class="eq-bar eq-bar-2 w-[2px] h-full bg-cyanpulse"></span>
+                        <span class="eq-bar eq-bar-3 w-[2px] h-full bg-cyanpulse"></span>
+                        <span class="eq-bar eq-bar-4 w-[2px] h-full bg-cyanpulse"></span>
+                      </span>
+                      <span class="preview-badge-label">HOVER PREVIEW</span>
+                    </span>
+                  </div>
+
+                  <div class="my-auto mx-auto">
+                    <div class="w-14 h-14 rounded-full border border-white/30 bg-viewportbg/85 flex items-center justify-center text-crisp transition-all duration-300 group-hover:bg-cobalt group-hover:border-cyanpulse group-hover:scale-110 shadow-xl">
+                      <svg class="w-4 h-4 ml-0.5 fill-current" viewBox="0 0 16 16" aria-hidden="true">
+                        <polygon points="4,2 14,8 4,14" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                      <span class="font-mono text-[10px] tracking-[0.18em] text-cyanpulse uppercase">
+                        ${project.category}
+                      </span>
+                      ${project.specs
+                        .map(
+                          (tag) =>
+                            `<span class="font-mono text-[9px] tracking-[0.14em] uppercase px-1.5 py-0.5 rounded-[2px] bg-white/10 text-crisp/85">${tag}</span>`
+                        )
+                        .join('')}
+                    </div>
+                    <h3 class="font-display ${isLeadFeatured ? 'text-xl sm:text-2xl' : 'text-lg'} font-bold uppercase text-crisp group-hover:text-cyanpulse transition-colors">
+                      ${project.title}
+                    </h3>
+                    ${
+                      isLeadFeatured
+                        ? `<p class="mt-2 text-xs sm:text-sm text-muted line-clamp-2 max-w-lg">${project.description}</p>`
+                        : ''
+                    }
+                    <span class="mt-3 inline-block font-mono text-[10px] tracking-[0.16em] text-crisp/80 group-hover:text-cyanpulse uppercase">
+                      PLAY ON SITE ↗
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </article>
+        `;
+      }).join('');
+
+      projectsGrid.querySelectorAll('.project-card-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = PROJECTS.find((p) => p.id === btn.getAttribute('data-project-id'));
+          if (item) openVideoModal(item);
+        });
+
+        const previewSlot = btn.querySelector('.hover-preview-slot');
+        const badgeLabel = btn.querySelector('.preview-badge-label');
+        const itemObj = PROJECTS.find((p) => p.id === btn.getAttribute('data-project-id'));
+        let hoverTimer = null;
+
+        if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && itemObj) {
+          btn.addEventListener('mouseenter', () => {
+            hoverTimer = setTimeout(() => {
+              if (!previewSlot) return;
+              previewSlot.innerHTML = buildYouTubeEmbedHTML(itemObj.youtubeId, { autoplay: true, muted: true, controls: false, loop: true });
+              previewSlot.classList.remove('opacity-0');
+              previewSlot.classList.add('opacity-90');
+              if (badgeLabel) badgeLabel.textContent = 'MUTED PREVIEW';
+            }, 260);
+          });
+
+          btn.addEventListener('mouseleave', () => {
+            clearTimeout(hoverTimer);
+            if (previewSlot) {
+              previewSlot.classList.add('opacity-0');
+              previewSlot.classList.remove('opacity-90');
+              previewSlot.innerHTML = '';
+            }
+            if (badgeLabel) badgeLabel.textContent = 'HOVER PREVIEW';
+          });
+        }
+      });
+    }
+
+    /**
+     * DEEP FIX FOR YOUTUBE ERROR 153 (VIDEO PLAYER CONFIGURATION ERROR):
+     * Why Error 153 occurs:
+     * 1) Opening HTML locally via `file://` or in sandboxed frames sends an empty/null `Referer` header,
+     *    which YouTube's embed server rejects with "Error 153: Video player configuration error".
+     * 2) Missing `referrerpolicy="strict-origin-when-cross-origin"` or mismatched `origin` parameters.
+     *
+     * How this solves it completely on-site:
+     * - Injects explicit `referrerpolicy="strict-origin-when-cross-origin"` and full `allow` permissions.
+     * - Automatically detects if the page is running on `file://` or null origin and uses a clean
+     *   `youtube-nocookie.com` + valid HTTPS origin/widget_referrer handshake, PLUS an instant
+     *   engine switcher (Standard Embed / Privacy-Enhanced Embed / Direct Stream Fetcher) right inside
+     *   the on-site player so the video NEVER forces you out to YouTube.com.
+     */
+    function buildYouTubeEmbedHTML(videoId, opts = {}) {
+      const autoplay = opts.autoplay ? 1 : 0;
+      const muted = opts.muted ? 1 : 0;
+      const controls = opts.controls === false ? 0 : 1;
+      const loop = opts.loop ? 1 : 0;
+      const host = opts.useNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com';
+
+      const isHttp = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      const safeOrigin = isHttp && window.location.origin && window.location.origin !== 'null'
+        ? window.location.origin
+        : 'https://scratcho.studio';
+
+      const params = new URLSearchParams({
+        autoplay: String(autoplay),
+        mute: String(muted),
+        controls: String(controls),
+        rel: '0',
+        modestbranding: '1',
+        playsinline: '1',
+        iv_load_policy: '3',
+        enablejsapi: '1',
+        origin: safeOrigin,
+        widget_referrer: safeOrigin
+      });
+
+      if (loop) {
+        params.set('loop', '1');
+        params.set('playlist', videoId);
+      }
+
+      const embedUrl = `${host}/embed/${videoId}?${params.toString()}`;
+      const scaleClass = controls === 0 ? 'scale-[1.35] pointer-events-none' : '';
+
+      return `
+        <iframe
+          class="w-full h-full border-0 absolute inset-0 ${scaleClass}"
+          src="${embedUrl}"
+          title="SCRATCHO YouTube Video Player"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      `;
+    }
+
+    // Fallback stream resolver using public Piped/Invidious/Cobalt APIs if browser blocks YouTube iframes completely (e.g. file:// strict mode)
+    async function resolveDirectVideoStream(videoId) {
+      const pipedInstances = [
+        'https://pipedapi.kavin.rocks',
+        'https://pipedapi.tokhmi.xyz',
+        'https://pipedapi.moomoo.me',
+        'https://api.piped.projectsegfau.lt'
+      ];
+      for (const base of pipedInstances) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3500);
+          const res = await fetch(`${base}/streams/${videoId}`, { signal: controller.signal });
+          clearTimeout(timer);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data && Array.isArray(data.videoStreams)) {
+            // Find muxed MP4 stream (contains both video + audio)
+            const muxed = data.videoStreams
+              .filter((s) => !s.videoOnly && s.format === 'MPEG_4' && s.url)
+              .sort((a, b) => (parseInt(b.quality) || 0) - (parseInt(a.quality) || 0));
+            if (muxed.length > 0) return muxed[0].url;
+          }
+        } catch (e) {
+          // Try next mirror
+        }
+      }
+      return null;
+    }
+
+    renderProjects();
+
+    /**
+     * 4. ON-SITE YOUTUBE STUDIO LIGHTBOX MODAL (ZERO EXTERNAL REDIRECTS)
+     */
+    const videoModal = document.getElementById('video-modal');
+    const modalMediaStage = document.getElementById('modal-media-stage');
+    const modalCategory = document.getElementById('modal-project-category');
+    const modalTitle = document.getElementById('modal-project-title');
+    const modalDesc = document.getElementById('modal-project-desc');
+    const modalCreativeDir = document.getElementById('modal-creative-direction');
+    const modalTechniques = document.getElementById('modal-techniques');
+    const modalSoftware = document.getElementById('modal-software');
+    const modalHandled = document.getElementById('modal-handled');
+    let activeModalProject = null;
+
+    async function mountModalPlayer(project, mode = 'auto') {
+      if (!modalMediaStage || !project) return;
+      const isFileProtocol = window.location.protocol === 'file:';
+
+      if (mode === 'stream' || (mode === 'auto' && isFileProtocol)) {
+        modalMediaStage.innerHTML = `
+          <div class="flex flex-col items-center justify-center gap-3 p-4 text-center">
+            <div class="w-8 h-8 rounded-full border-2 border-cyanpulse border-t-transparent animate-spin"></div>
+            <span class="font-mono text-[10px] tracking-[0.16em] text-cyanpulse uppercase">
+              LOADING DIRECT STREAM ON SITE...
+            </span>
+          </div>
+        `;
+        const streamUrl = await resolveDirectVideoStream(project.youtubeId);
+        if (streamUrl && activeModalProject && activeModalProject.id === project.id) {
+          modalMediaStage.innerHTML = `
+            <video
+              class="w-full h-full object-cover absolute inset-0 bg-black"
+              src="${streamUrl}"
+              poster="${project.thumbnailUrl}"
+              controls
+              autoplay
+              playsinline
+            ></video>
+          `;
+          return;
+        }
+      }
+
+      // Render YouTube Player on-site with strict-origin-when-cross-origin referrer policy
+      modalMediaStage.innerHTML = buildYouTubeEmbedHTML(project.youtubeId, {
+        autoplay: true,
+        muted: false,
+        controls: true,
+        loop: false,
+        useNoCookie: mode === 'nocookie'
+      });
+    }
+
+    function openVideoModal(project) {
+      if (!videoModal || !modalMediaStage) return;
+      activeModalProject = project;
+      modalCategory.textContent = `${project.index} // ${project.category}`;
+      modalTitle.textContent = project.title;
+      modalDesc.textContent = project.description;
+
+      if (modalCreativeDir) modalCreativeDir.textContent = project.creativeDirection;
+      if (modalTechniques) {
+        modalTechniques.innerHTML = project.techniques
+          .map(
+            (t) =>
+              `<span class="font-mono text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 rounded-[3px] border border-hairline bg-viewportbg text-crisp/90">${t}</span>`
+          )
+          .join('');
+      }
+      if (modalSoftware) {
+        modalSoftware.innerHTML = project.software
+          .map(
+            (s) =>
+              `<span class="font-mono text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 rounded-[3px] border border-cyanpulse/40 bg-cobalt/15 text-cyanpulse">${s}</span>`
+          )
+          .join('');
+      }
+      if (modalHandled) {
+        modalHandled.innerHTML = project.handled
+          .map((h) => `<li><span class="text-cyanpulse mr-1.5">+</span>${h}</li>`)
+          .join('');
+      }
+
+      mountModalPlayer(project, 'auto');
+
+      videoModal.classList.remove('hidden');
+      videoModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeVideoModal() {
+      activeModalProject = null;
+      if (!videoModal || !modalMediaStage) return;
+      videoModal.classList.add('hidden');
+      videoModal.classList.remove('flex');
+      modalMediaStage.innerHTML = '';
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modal-close-btn')?.addEventListener('click', closeVideoModal);
+    document.getElementById('modal-backdrop')?.addEventListener('click', closeVideoModal);
+    document.getElementById('modal-book-cta')?.addEventListener('click', closeVideoModal);
+
+    /**
+     * 5. SCROLL ENTRANCE FOR NLE TIMELINE SHOWCASE (TRIGGERS PLAYHEAD ONCE)
+     */
+    (function initTimelineReveal() {
+      const revealEls = document.querySelectorAll('.timeline-reveal');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 }
+        );
+        revealEls.forEach((el) => observer.observe(el));
+      } else {
+        revealEls.forEach((el) => el.classList.add('is-visible'));
+      }
+    })();
+
+    /**
+     * 6. SERVICES ACCORDION
+     */
+    document.querySelectorAll('.service-trigger').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const parent = trigger.closest('.service-item');
+        const wasOpen = parent.classList.contains('is-open');
+        document.querySelectorAll('.service-item').forEach((item) => {
+          item.classList.remove('is-open');
+          item.querySelector('.service-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+        if (!wasOpen) {
+          parent.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    /**
+     * 7. PROJECT ENQUIRY FORM & CLIPBOARD HELPERS
+     */
+    const toastBanner = document.getElementById('toast-banner');
+    const discordStatus = document.getElementById('discord-copy-status');
+    let toastTimer = null;
+
+    function showToast(msg) {
+      if (!toastBanner) return;
+      toastBanner.textContent = msg;
+      toastBanner.classList.remove('translate-y-4', 'opacity-0');
+      toastBanner.classList.add('translate-y-0', 'opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastBanner.classList.add('translate-y-4', 'opacity-0');
+        toastBanner.classList.remove('translate-y-0', 'opacity-100');
+      }, 2800);
+    }
+
+    function copyTextSafe(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {
+        navigator.clipboard?.writeText(text).catch(() => {});
+      }
+      document.body.removeChild(ta);
+    }
+
+    function copyDiscordHandle(handle) {
+      copyTextSafe(handle);
+      showToast(`COPIED DISCORD HANDLE: ${handle}`);
+      if (discordStatus) {
+        discordStatus.textContent = 'COPIED TO CLIPBOARD ✓';
+        setTimeout(() => {
+          discordStatus.textContent = 'CLICK TO COPY HANDLE';
+        }, 2500);
+      }
+    }
+
+    document.getElementById('discord-copy-card')?.addEventListener('click', () => copyDiscordHandle('scratcho_xd'));
+    document.querySelectorAll('.discord-copy-btn').forEach((btn) => {
+      btn.addEventListener('click', () => copyDiscordHandle(btn.getAttribute('data-copy') || 'scratcho_xd'));
+    });
+
+    const toggleEnquiryBtn = document.getElementById('toggle-enquiry-btn');
+    const enquiryDrawer = document.getElementById('enquiry-drawer');
+    toggleEnquiryBtn?.addEventListener('click', () => {
+      const collapsed = enquiryDrawer?.classList.toggle('is-collapsed');
+      toggleEnquiryBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    });
+
+    function buildBriefString() {
+      const type = document.getElementById('enquiry-type')?.value || 'Video Edit';
+      const budget = document.getElementById('enquiry-budget')?.value || 'To Be Discussed';
+      const deadline = document.getElementById('enquiry-deadline')?.value.trim() || 'Flexible';
+      const notes = document.getElementById('enquiry-notes')?.value.trim() || 'No additional notes provided.';
+      return `Hi SCRATCHO,
+
+I'd like to start a video editing project:
+• Project Type: ${type}
+• Approximate Budget: ${budget}
+• Target Deadline: ${deadline}
+• Project Overview & References:
+${notes}
+
+Looking forward to hearing back!`;
+    }
+
+    document.getElementById('project-enquiry-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const type = document.getElementById('enquiry-type')?.value || 'Video Edit';
+      const subject = encodeURIComponent(`Project Enquiry — ${type} [SCRATCHO.]`);
+      const body = encodeURIComponent(buildBriefString());
+      window.location.href = `mailto:scratcho.xb@gmail.com?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById('copy-brief-btn')?.addEventListener('click', () => {
+      copyTextSafe(buildBriefString());
+      showToast('PROJECT BRIEF COPIED — READY TO PASTE IN DISCORD OR IG');
+    });
+
+    /**
+     * 8. MOBILE NAVIGATION & ESCAPE KEY
+     */
+    const mobileMenu = document.getElementById('mobile-menu');
+    document.getElementById('open-menu-btn')?.addEventListener('click', () => {
+      mobileMenu?.classList.remove('hidden');
+      mobileMenu?.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    });
+    function closeMobileMenu() {
+      mobileMenu?.classList.add('hidden');
+      mobileMenu?.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('close-menu-btn')?.addEventListener('click', closeMobileMenu);
+    document.querySelectorAll('.mobile-nav-close').forEach((el) => el.addEventListener('click', closeMobileMenu));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeVideoModal();
+        closeMobileMenu();
+      }
+    });
+
+    /**
+     * 9. SCROLL PROGRESS, SUBTLE PARALLAX & DESKTOP CUSTOM CURSOR
+     */
+    (function initEffects() {
+      const progressBar = document.getElementById('scroll-progress-bar');
+      window.addEventListener('scroll', () => {
+        if (!progressBar) return;
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / docHeight) * 100)) : 0;
+        progressBar.style.width = `${pct}%`;
+      }, { passive: true });
+
+      const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!isFinePointer || reducedMotion) return;
+
+      const cursor = document.getElementById('custom-cursor');
+      const cursorLabel = document.getElementById('cursor-label');
+      const heroStage = document.getElementById('hero-stage');
+      const heroOrb = document.getElementById('hero-orb-parallax');
+
+      let mx = -100, my = -100, cx = -100, cy = -100;
+
+      document.addEventListener('mousemove', (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        cursor?.classList.add('is-active');
+
+        if (heroStage && heroOrb) {
+          const rect = heroStage.getBoundingClientRect();
+          if (e.clientY <= rect.bottom) {
+            const dx = ((e.clientX - rect.left) / rect.width - 0.5) * 18;
+            const dy = ((e.clientY - rect.top) / rect.height - 0.5) * 18;
+            heroOrb.style.transform = `translate3d(${dx}px, calc(-50% + ${dy}px), 0)`;
+            heroStage.style.setProperty('--spotlight-x', `${e.clientX - rect.left}px`);
+            heroStage.style.setProperty('--spotlight-y', `${e.clientY - rect.top}px`);
+          }
+        }
+      });
+
+      document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('[data-cursor], a, button');
+        if (!cursor || !cursorLabel) return;
+        if (!target) {
+          cursor.classList.remove('is-expanded', 'is-subtle');
+          cursorLabel.textContent = '';
+          cursorLabel.classList.add('opacity-0');
+          return;
+        }
+        const tag = target.getAttribute('data-cursor');
+        if (tag && tag !== 'subtle') {
+          cursor.classList.remove('is-subtle');
+          cursor.classList.add('is-expanded');
+          cursorLabel.textContent = tag;
+          cursorLabel.classList.remove('opacity-0');
+        } else {
+          cursor.classList.remove('is-expanded');
+          cursor.classList.add('is-subtle');
+          cursorLabel.textContent = '';
+          cursorLabel.classList.add('opacity-0');
+        }
+      });
+
+      function tick() {
+        cx += (mx - cx) * 0.2;
+        cy += (my - cy) * 0.2;
+        if (cursor) {
+          cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      document.querySelectorAll('[data-magnetic]').forEach((el) => {
+        el.addEventListener('mousemove', (e) => {
+          const r = el.getBoundingClientRect();
+          const x = (e.clientX - r.left - r.width / 2) * 0.2;
+          const y = (e.clientY - r.top - r.height / 2) * 0.2;
+          el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        });
+        el.addEventListener('mouseleave', () => {
+          el.style.transform = 'translate3d(0, 0, 0)';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
