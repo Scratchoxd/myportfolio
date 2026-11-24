@@ -517,7 +517,7 @@
   <div class="film-grain-overlay" aria-hidden="true"></div>
 
   <!-- Hidden file input for manual logo upload fallback -->
-  <input id="logo-file-picker" type="file" accept="image/*" class="hidden" />
+
 
   <!-- Custom Desktop Cursor -->
   <div id="custom-cursor" aria-hidden="true">
@@ -707,19 +707,7 @@
                 onerror="handleLogoFallback(this)"
               />
             </div>
-          </div>
-
-          <button
-            id="missing-logo-helper"
-            type="button"
-            onclick="document.getElementById('logo-file-picker').click()"
-            class="hidden mt-4 font-mono text-[10px] tracking-[0.16em] uppercase text-cyanpulse bg-viewportbg/90 border border-cyanpulse/50 px-3.5 py-1.5 rounded-full hover:bg-cobalt hover:text-crisp transition-colors"
-          >
-            + LOAD LOCAL LOGO FILE
-          </button>
-        </div>
-
-      </div>
+        
 
       <!-- Minimal Bottom Scroll Prompt -->
       <div class="relative z-20 flex justify-end pt-2">
