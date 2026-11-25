@@ -516,9 +516,6 @@
   <!-- Subtle Film Grain -->
   <div class="film-grain-overlay" aria-hidden="true"></div>
 
-  <!-- Hidden file input for manual logo upload fallback -->
-
-
   <!-- Custom Desktop Cursor -->
   <div id="custom-cursor" aria-hidden="true">
     <span id="cursor-label" class="opacity-0 transition-opacity duration-200"></span>
@@ -532,11 +529,9 @@
       <a href="#top" class="inline-flex items-center gap-3 mobile-nav-close">
         <span class="w-9 h-9 rounded-full overflow-hidden logo-ring-glow bg-stagebg inline-flex items-center justify-center">
           <img
-<img
-  src="./logo.jpg"
-  alt="hellomr"
-  class="scratcho-brand-logo w-full h-full object-cover"
-/>
+            src="./logo.jpg"
+            alt="SCRATCHO Logo"
+            class="scratcho-brand-logo w-full h-full object-cover"
             onerror="handleLogoFallback(this)"
           />
         </span>
@@ -588,11 +583,9 @@
           <a href="#top" data-cursor="subtle" class="group inline-flex items-center gap-3 focus:outline-none" title="SCRATCHO.">
             <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden logo-ring-glow bg-viewportbg inline-flex items-center justify-center shrink-0">
               <img
-              <img
-  src="./logo.jpg"
-  alt="SCRATCHO Logo"
-  class="scratcho-brand-logo w-full h-full object-cover"
-/>
+                src="./logo.jpg"
+                alt="SCRATCHO Logo"
+                class="scratcho-brand-logo w-full h-full object-cover"
                 onerror="handleLogoFallback(this)"
               />
             </span>
@@ -699,11 +692,9 @@
 
             <div class="w-56 h-56 sm:w-72 sm:h-72 lg:w-[340px] lg:h-[340px] rounded-full overflow-hidden logo-ring-glow bg-viewportbg relative shadow-2xl">
               <img
-       <img
-  src="./logo.jpg"
-  alt="SCRATCHO Logo"
-  class="scratcho-brand-logo w-full h-full object-cover"
-/>
+                src="./logo.jpg"
+                alt="SCRATCHO Logo"
+                class="scratcho-brand-logo w-full h-full object-cover"
                 onerror="handleLogoFallback(this)"
               />
             </div>
@@ -983,10 +974,10 @@
           </h2>
           <div class="mt-8 flex items-center gap-4">
             <div class="w-14 h-14 rounded-full overflow-hidden logo-ring-glow bg-viewportbg shrink-0">
-<img
-  src="./logo.jpg"
-  alt="SCRATCHO Logo"
-  class="scratcho-brand-logo w-full h-full object-cover"
+              <img
+                src="./logo.jpg"
+                alt="SCRATCHO Logo"
+                class="scratcho-brand-logo w-full h-full object-cover"
                 onerror="handleLogoFallback(this)"
               />
             </div>
@@ -1390,7 +1381,7 @@
         <a href="#top" data-cursor="subtle" class="group inline-flex items-center gap-3.5">
           <span class="w-10 h-10 rounded-full overflow-hidden logo-ring-glow bg-stagebg inline-flex items-center justify-center shrink-0">
             <img
-              src="./Porfilelogo_2.png"
+              src="./logo.jpg"
               alt="SCRATCHO Logo"
               class="scratcho-brand-logo w-full h-full object-cover"
               onerror="handleLogoFallback(this)"
@@ -1562,7 +1553,7 @@
        ======================================================================== -->
   <script>
     /**
-     * 1. LOGO FALLBACK CHAIN: Porfilelogo_2.png -> Porfilelogo.png -> SVG Emblem
+     * 1. LOGO IMAGE FALLBACK: logo.jpg -> Porfilelogo.png -> SVG Emblem
      */
     function handleLogoFallback(imgEl) {
       const stage = Number(imgEl.dataset.fallbackStage || '0');
@@ -1601,22 +1592,8 @@
         );
 
       imgEl.src = svgFallback;
-      const helperBtn = document.getElementById('missing-logo-helper');
-      if (helperBtn) helperBtn.classList.remove('hidden');
     }
 
-    const logoFilePicker = document.getElementById('logo-file-picker');
-    if (logoFilePicker) {
-      logoFilePicker.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const objectUrl = URL.createObjectURL(file);
-        document.querySelectorAll('.scratcho-brand-logo').forEach((img) => {
-          img.src = objectUrl;
-        });
-        document.getElementById('missing-logo-helper')?.classList.add('hidden');
-      });
-    }
 
     /**
      * 2. CURATED PROJECTS & CASE STUDIES
