@@ -531,10 +531,10 @@
     <div class="flex items-center justify-between border-b border-hairline pb-5">
       <a href="#top" class="inline-flex items-center gap-3 mobile-nav-close">
         <span class="w-9 h-9 rounded-full overflow-hidden logo-ring-glow bg-stagebg inline-flex items-center justify-center">
-<img 
+          <img
 <img
   src="./logo.jpg"
-  alt="SCRATCHO"
+  alt="hellomr"
   class="scratcho-brand-logo w-full h-full object-cover"
 />
             onerror="handleLogoFallback(this)"
@@ -590,7 +590,7 @@
               <img
               <img
   src="./logo.jpg"
-  alt="hellomr Logo"
+  alt="SCRATCHO Logo"
   class="scratcho-brand-logo w-full h-full object-cover"
 />
                 onerror="handleLogoFallback(this)"
@@ -1389,10 +1389,10 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <a href="#top" data-cursor="subtle" class="group inline-flex items-center gap-3.5">
           <span class="w-10 h-10 rounded-full overflow-hidden logo-ring-glow bg-stagebg inline-flex items-center justify-center shrink-0">
-          <img
-  src="./logo.jpg"
-  alt="SCRATCHO Logo"
-  class="scratcho-brand-logo w-full h-full object-cover"
+            <img
+              src="./Porfilelogo_2.png"
+              alt="SCRATCHO Logo"
+              class="scratcho-brand-logo w-full h-full object-cover"
               onerror="handleLogoFallback(this)"
             />
           </span>
@@ -1562,13 +1562,13 @@
        ======================================================================== -->
   <script>
     /**
-     * 1. LOGO FALLBACK CHAIN: logo.jpg ->  logo.jp -> SVG Emblem
+     * 1. LOGO FALLBACK CHAIN: Porfilelogo_2.png -> Porfilelogo.png -> SVG Emblem
      */
     function handleLogoFallback(imgEl) {
       const stage = Number(imgEl.dataset.fallbackStage || '0');
       if (stage === 0) {
         imgEl.dataset.fallbackStage = '1';
-        imgEl  src="./logo.jpg"
+        imgEl.src = './Porfilelogo.png';
         return;
       }
       if (stage >= 2) return;
@@ -2267,4 +2267,3 @@ Looking forward to hearing back!`;
   </script>
 </body>
 </html>
-
