@@ -493,6 +493,17 @@
       }
     }
 
+    /* Mobile hero: align the blue orb behind the large logo centerpiece. */
+    @media (max-width: 767px) {
+      #hero-orb-parallax {
+        top: 69% !important;
+        right: -7% !important;
+        width: 280px !important;
+        height: 280px !important;
+        transform: translateY(-50%) !important;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
